@@ -1,0 +1,33 @@
+## Build outputs
+bin/
+obj/
+[Dd]ebug/
+[Rr]elease/
+
+## Visual Studio / VS Code configuration
+.vs/
+.vscode/
+*.user
+*.userosscache
+*.sln.docstates
+*.suo
+*.userprefs
+*.pidb
+
+## NuGet packages
+packages/
+*.nuget.props
+*.nuget.targets
+
+## Test results
+TestResults/
+
+## Operating System files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+[Bb]umb.db
+
+## AI Agent configuration
+.agents/
+/TODOS.md
