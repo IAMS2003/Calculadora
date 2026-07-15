@@ -1,8 +1,167 @@
-﻿<UserControl x:Class="Calculadora.Views.ScientificCalculatorView"
+<UserControl x:Class="Calculadora.Views.ScientificCalculatorView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              Background="#1C1C1C" Foreground="White">
-    <Grid>
-        <TextBlock Text="ScientificCalculatorView (En construcción)" FontSize="24" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+    <UserControl.Resources>
+        <!-- Estilos base para botones de la científica -->
+        <Style TargetType="Button">
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Margin" Value="2"/>
+            <Setter Property="Background" Value="#333333"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Focusable" Value="False"/>
+            <Style.Resources>
+                <Style TargetType="Border">
+                    <Setter Property="CornerRadius" Value="6"/>
+                </Style>
+            </Style.Resources>
+        </Style>
+
+        <Style x:Key="NumericBtn" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Background" Value="#3A3A3C"/>
+        </Style>
+
+        <Style x:Key="OpBtn" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Background" Value="#FF9F0A"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+
+        <Style x:Key="SciBtn" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Background" Value="#2C2C2E"/>
+            <Setter Property="Foreground" Value="#0A84FF"/>
+            <Setter Property="FontSize" Value="14"/>
+        </Style>
+        
+        <Style x:Key="ControlBtn" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Background" Value="#AEAEB2"/>
+            <Setter Property="Foreground" Value="Black"/>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/> <!-- Display -->
+            <RowDefinition Height="*"/>    <!-- Botones -->
+        </Grid.RowDefinitions>
+
+        <!-- Display Area -->
+        <Border Grid.Row="0" Background="#1C1C1C" Padding="10" Height="100" 
+                BorderBrush="#2C2C2E" BorderThickness="0,0,0,1" Margin="0,0,0,10">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                
+                <TextBox Grid.Row="0" Text="{Binding Expression, UpdateSourceTrigger=PropertyChanged}" 
+                         Background="Transparent" BorderThickness="0" Foreground="White"
+                         FontSize="30" FontWeight="Light" TextAlignment="Right" 
+                         VerticalAlignment="Bottom" Margin="0,0,0,5"/>
+                         
+                <TextBlock Grid.Row="1" Text="{Binding Result}" 
+                           FontSize="20" Foreground="#8E8E93" 
+                           HorizontalAlignment="Right" />
+            </Grid>
+        </Border>
+
+        <!-- Grid de Botones -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <!-- Científicos -->
+                <ColumnDefinition Width="3*"/>
+                <!-- Numéricos y Básicos -->
+                <ColumnDefinition Width="4*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Panel Científico -->
+            <Grid Grid.Column="0" Margin="0,0,10,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Fila 0 -->
+                <Button Grid.Row="0" Grid.Column="0" Content="{Binding AngleModeText}" Style="{StaticResource SciBtn}" Command="{Binding ToggleAngleModeCommand}"/>
+                <Button Grid.Row="0" Grid.Column="1" Content="(" Style="{StaticResource SciBtn}" Command="{Binding AppendCommand}" CommandParameter="("/>
+                <Button Grid.Row="0" Grid.Column="2" Content=")" Style="{StaticResource SciBtn}" Command="{Binding AppendCommand}" CommandParameter=")"/>
+
+                <!-- Fila 1 -->
+                <Button Grid.Row="1" Grid.Column="0" Content="sin" Style="{StaticResource SciBtn}" Command="{Binding AppendFunctionCommand}" CommandParameter="sin"/>
+                <Button Grid.Row="1" Grid.Column="1" Content="cos" Style="{StaticResource SciBtn}" Command="{Binding AppendFunctionCommand}" CommandParameter="cos"/>
+                <Button Grid.Row="1" Grid.Column="2" Content="tan" Style="{StaticResource SciBtn}" Command="{Binding AppendFunctionCommand}" CommandParameter="tan"/>
+
+                <!-- Fila 2 -->
+                <Button Grid.Row="2" Grid.Column="0" Content="asin" Style="{StaticResource SciBtn}" Command="{Binding AppendFunctionCommand}" CommandParameter="asin"/>
+                <Button Grid.Row="2" Grid.Column="1" Content="acos" Style="{StaticResource SciBtn}" Command="{Binding AppendFunctionCommand}" CommandParameter="acos"/>
+                <Button Grid.Row="2" Grid.Column="2" Content="atan" Style="{StaticResource SciBtn}" Command="{Binding AppendFunctionCommand}" CommandParameter="atan"/>
+
+                <!-- Fila 3 -->
+                <Button Grid.Row="3" Grid.Column="0" Content="ln" Style="{StaticResource SciBtn}" Command="{Binding AppendFunctionCommand}" CommandParameter="ln"/>
+                <Button Grid.Row="3" Grid.Column="1" Content="log" Style="{StaticResource SciBtn}" Command="{Binding AppendFunctionCommand}" CommandParameter="log"/>
+                <Button Grid.Row="3" Grid.Column="2" Content="x!" Style="{StaticResource SciBtn}" Command="{Binding AppendCommand}" CommandParameter="!"/>
+
+                <!-- Fila 4 -->
+                <Button Grid.Row="4" Grid.Column="0" Content="π" Style="{StaticResource SciBtn}" Command="{Binding AppendCommand}" CommandParameter="pi"/>
+                <Button Grid.Row="4" Grid.Column="1" Content="e" Style="{StaticResource SciBtn}" Command="{Binding AppendCommand}" CommandParameter="e"/>
+                <Button Grid.Row="4" Grid.Column="2" Content="^" Style="{StaticResource SciBtn}" Command="{Binding AppendCommand}" CommandParameter="^"/>
+            </Grid>
+
+            <!-- Panel Numérico (Igual que la básica) -->
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Fila 0 -->
+                <Button Grid.Row="0" Grid.Column="0" Content="C" Style="{StaticResource ControlBtn}" Command="{Binding ClearCommand}"/>
+                <Button Grid.Row="0" Grid.Column="1" Content="⌫" Style="{StaticResource ControlBtn}" Command="{Binding BackspaceCommand}"/>
+                <Button Grid.Row="0" Grid.Column="2" Content="%" Style="{StaticResource ControlBtn}" Command="{Binding AppendCommand}" CommandParameter="%"/>
+                <Button Grid.Row="0" Grid.Column="3" Content="÷" Style="{StaticResource OpBtn}" Command="{Binding AppendCommand}" CommandParameter="/"/>
+
+                <!-- Fila 1 -->
+                <Button Grid.Row="1" Grid.Column="0" Content="7" Style="{StaticResource NumericBtn}" Command="{Binding AppendCommand}" CommandParameter="7"/>
+                <Button Grid.Row="1" Grid.Column="1" Content="8" Style="{StaticResource NumericBtn}" Command="{Binding AppendCommand}" CommandParameter="8"/>
+                <Button Grid.Row="1" Grid.Column="2" Content="9" Style="{StaticResource NumericBtn}" Command="{Binding AppendCommand}" CommandParameter="9"/>
+                <Button Grid.Row="1" Grid.Column="3" Content="×" Style="{StaticResource OpBtn}" Command="{Binding AppendCommand}" CommandParameter="*"/>
+
+                <!-- Fila 2 -->
+                <Button Grid.Row="2" Grid.Column="0" Content="4" Style="{StaticResource NumericBtn}" Command="{Binding AppendCommand}" CommandParameter="4"/>
+                <Button Grid.Row="2" Grid.Column="1" Content="5" Style="{StaticResource NumericBtn}" Command="{Binding AppendCommand}" CommandParameter="5"/>
+                <Button Grid.Row="2" Grid.Column="2" Content="6" Style="{StaticResource NumericBtn}" Command="{Binding AppendCommand}" CommandParameter="6"/>
+                <Button Grid.Row="2" Grid.Column="3" Content="−" Style="{StaticResource OpBtn}" Command="{Binding AppendCommand}" CommandParameter="-"/>
+
+                <!-- Fila 3 -->
+                <Button Grid.Row="3" Grid.Column="0" Content="1" Style="{StaticResource NumericBtn}" Command="{Binding AppendCommand}" CommandParameter="1"/>
+                <Button Grid.Row="3" Grid.Column="1" Content="2" Style="{StaticResource NumericBtn}" Command="{Binding AppendCommand}" CommandParameter="2"/>
+                <Button Grid.Row="3" Grid.Column="2" Content="3" Style="{StaticResource NumericBtn}" Command="{Binding AppendCommand}" CommandParameter="3"/>
+                <Button Grid.Row="3" Grid.Column="3" Content="+" Style="{StaticResource OpBtn}" Command="{Binding AppendCommand}" CommandParameter="+"/>
+
+                <!-- Fila 4 -->
+                <Button Grid.Row="4" Grid.Column="0" Content="+/-" Style="{StaticResource ControlBtn}" Command="{Binding AppendCommand}" CommandParameter="-"/>
+                <Button Grid.Row="4" Grid.Column="1" Content="0" Style="{StaticResource NumericBtn}" Command="{Binding AppendCommand}" CommandParameter="0"/>
+                <Button Grid.Row="4" Grid.Column="2" Content="." Style="{StaticResource NumericBtn}" Command="{Binding AppendCommand}" CommandParameter="."/>
+                <Button Grid.Row="4" Grid.Column="3" Content="=" Style="{StaticResource OpBtn}" Command="{Binding EvaluateCommand}"/>
+            </Grid>
+        </Grid>
     </Grid>
 </UserControl>
