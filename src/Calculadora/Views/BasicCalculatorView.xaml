@@ -1,0 +1,137 @@
+<UserControl x:Class="Calculadora.Views.BasicCalculatorView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Calculadora.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="320"
+             Background="#1C1C1C" Foreground="White">
+    <UserControl.Resources>
+        <!-- Estilo común para todos los botones -->
+        <Style TargetType="Button">
+            <Setter Property="FontSize" Value="20"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Margin" Value="4"/>
+            <Setter Property="Background" Value="#333333"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Focusable" Value="False"/>
+            <!-- Estilo para hover/click básicos -->
+            <Style.Resources>
+                <Style TargetType="Border">
+                    <Setter Property="CornerRadius" Value="6"/>
+                </Style>
+            </Style.Resources>
+        </Style>
+
+        <!-- Estilo para botones numéricos -->
+        <Style x:Key="NumericButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Background" Value="#3A3A3C"/>
+        </Style>
+
+        <!-- Estilo para botones de operaciones -->
+        <Style x:Key="OperatorButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Background" Value="#FF9F0A"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+
+        <!-- Estilo para el botón Clear -->
+        <Style x:Key="ClearButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Background" Value="#AEAEB2"/>
+            <Setter Property="Foreground" Value="Black"/>
+        </Style>
+
+        <!-- Estilo para el botón de Igual -->
+        <Style x:Key="EqualsButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Background" Value="#FF9F0A"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <!-- Fila del Display (Visor de números) -->
+            <RowDefinition Height="Auto"/>
+            <!-- Fila de los Botones -->
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Display Area -->
+        <Border Grid.Row="0" Background="#1C1C1C" Padding="10" Height="80" 
+                BorderBrush="#2C2C2E" BorderThickness="0,0,0,1" Margin="0,0,0,10">
+            <TextBlock Text="{Binding DisplayText}" 
+                       FontSize="40" 
+                       FontWeight="Light"
+                       Foreground="White"
+                       HorizontalAlignment="Right" 
+                       VerticalAlignment="Bottom"
+                       TextAlignment="Right"
+                       TextWrapping="NoWrap"
+                       TextTrimming="CharacterEllipsis"/>
+        </Border>
+
+        <!-- Grid de Botones -->
+        <Grid Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Fila 0 -->
+            <Button Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Content="C" 
+                    Style="{StaticResource ClearButtonStyle}" Command="{Binding ClearCommand}"/>
+            <Button Grid.Row="0" Grid.Column="2" Content="%" 
+                    Style="{StaticResource ClearButtonStyle}" Command="{Binding OperationCommand}" CommandParameter="%"/>
+            <Button Grid.Row="0" Grid.Column="3" Content="÷" 
+                    Style="{StaticResource OperatorButtonStyle}" Command="{Binding OperationCommand}" CommandParameter="/"/>
+
+            <!-- Fila 1 -->
+            <Button Grid.Row="1" Grid.Column="0" Content="7" 
+                    Style="{StaticResource NumericButtonStyle}" Command="{Binding NumberInputCommand}" CommandParameter="7"/>
+            <Button Grid.Row="1" Grid.Column="1" Content="8" 
+                    Style="{StaticResource NumericButtonStyle}" Command="{Binding NumberInputCommand}" CommandParameter="8"/>
+            <Button Grid.Row="1" Grid.Column="2" Content="9" 
+                    Style="{StaticResource NumericButtonStyle}" Command="{Binding NumberInputCommand}" CommandParameter="9"/>
+            <Button Grid.Row="1" Grid.Column="3" Content="×" 
+                    Style="{StaticResource OperatorButtonStyle}" Command="{Binding OperationCommand}" CommandParameter="*"/>
+
+            <!-- Fila 2 -->
+            <Button Grid.Row="2" Grid.Column="0" Content="4" 
+                    Style="{StaticResource NumericButtonStyle}" Command="{Binding NumberInputCommand}" CommandParameter="4"/>
+            <Button Grid.Row="2" Grid.Column="1" Content="5" 
+                    Style="{StaticResource NumericButtonStyle}" Command="{Binding NumberInputCommand}" CommandParameter="5"/>
+            <Button Grid.Row="2" Grid.Column="2" Content="6" 
+                    Style="{StaticResource NumericButtonStyle}" Command="{Binding NumberInputCommand}" CommandParameter="6"/>
+            <Button Grid.Row="2" Grid.Column="3" Content="−" 
+                    Style="{StaticResource OperatorButtonStyle}" Command="{Binding OperationCommand}" CommandParameter="-"/>
+
+            <!-- Fila 3 -->
+            <Button Grid.Row="3" Grid.Column="0" Content="1" 
+                    Style="{StaticResource NumericButtonStyle}" Command="{Binding NumberInputCommand}" CommandParameter="1"/>
+            <Button Grid.Row="3" Grid.Column="1" Content="2" 
+                    Style="{StaticResource NumericButtonStyle}" Command="{Binding NumberInputCommand}" CommandParameter="2"/>
+            <Button Grid.Row="3" Grid.Column="2" Content="3" 
+                    Style="{StaticResource NumericButtonStyle}" Command="{Binding NumberInputCommand}" CommandParameter="3"/>
+            <Button Grid.Row="3" Grid.Column="3" Content="+" 
+                    Style="{StaticResource OperatorButtonStyle}" Command="{Binding OperationCommand}" CommandParameter="+"/>
+
+            <!-- Fila 4 -->
+            <Button Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Content="0" 
+                    Style="{StaticResource NumericButtonStyle}" Command="{Binding NumberInputCommand}" CommandParameter="0"/>
+            <Button Grid.Row="4" Grid.Column="2" Content="." 
+                    Style="{StaticResource NumericButtonStyle}" Command="{Binding NumberInputCommand}" CommandParameter="."/>
+            <Button Grid.Row="4" Grid.Column="3" Content="=" 
+                    Style="{StaticResource EqualsButtonStyle}" Command="{Binding EqualsCommand}"/>
+        </Grid>
+    </Grid>
+</UserControl>

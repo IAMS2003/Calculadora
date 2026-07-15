@@ -4,136 +4,102 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:Calculadora.ViewModels"
+        xmlns:views="clr-namespace:Calculadora.Views"
         mc:Ignorable="d"
-        Title="Calculadora" Height="450" Width="320"
+        Title="Calculadora Científica Avanzada" Height="600" Width="800"
+        MinWidth="800" MinHeight="600"
         Background="#1C1C1C" Foreground="White"
-        WindowStartupLocation="CenterScreen" ResizeMode="NoResize">
+        WindowStartupLocation="CenterScreen" ResizeMode="CanResize">
     
     <Window.Resources>
-        <!-- Estilo común para todos los botones -->
-        <Style TargetType="Button">
-            <Setter Property="FontSize" Value="20"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
+        <!-- DataTemplates para enrutar ViewModels a Views -->
+        <DataTemplate DataType="{x:Type vm:CalculatorViewModel}">
+            <views:BasicCalculatorView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ScientificViewModel}">
+            <views:ScientificCalculatorView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:GraphPlotterViewModel}">
+            <views:GraphPlotterView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:CalculusViewModel}">
+            <views:CalculusView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:MatrixViewModel}">
+            <views:MatrixView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:HistoryViewModel}">
+            <views:HistoryView />
+        </DataTemplate>
+
+        <!-- Estilo para los botones del Sidebar -->
+        <Style x:Key="SidebarButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#AEAEB2"/>
+            <Setter Property="FontSize" Value="16"/>
             <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Margin" Value="4"/>
-            <Setter Property="Background" Value="#333333"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="Focusable" Value="False"/>
-            <!-- Estilo para hover/click básicos -->
-            <Style.Resources>
-                <Style TargetType="Border">
-                    <Setter Property="CornerRadius" Value="6"/>
-                </Style>
-            </Style.Resources>
-        </Style>
-
-        <!-- Estilo para botones numéricos -->
-        <Style x:Key="NumericButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
-            <Setter Property="Background" Value="#3A3A3C"/>
-        </Style>
-
-        <!-- Estilo para botones de operaciones -->
-        <Style x:Key="OperatorButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
-            <Setter Property="Background" Value="#FF9F0A"/>
-            <Setter Property="Foreground" Value="White"/>
-        </Style>
-
-        <!-- Estilo para el botón Clear -->
-        <Style x:Key="ClearButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
-            <Setter Property="Background" Value="#AEAEB2"/>
-            <Setter Property="Foreground" Value="Black"/>
-        </Style>
-
-        <!-- Estilo para el botón de Igual -->
-        <Style x:Key="EqualsButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
-            <Setter Property="Background" Value="#FF9F0A"/>
-            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Padding" Value="20,15"/>
+            <Setter Property="Margin" Value="0,2"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" 
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#2C2C2E"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
     </Window.Resources>
 
-    <Grid Margin="10">
-        <Grid.RowDefinitions>
-            <!-- Fila del Display (Visor de números) -->
-            <RowDefinition Height="Auto"/>
-            <!-- Fila de los Botones -->
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <!-- Sidebar -->
+            <ColumnDefinition Width="220"/>
+            <!-- Main Content -->
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
 
-        <!-- Display Area -->
-        <Border Grid.Row="0" Background="#1C1C1C" Padding="10" Height="80" 
-                BorderBrush="#2C2C2E" BorderThickness="0,0,0,1" Margin="0,0,0,10">
-            <TextBlock Text="{Binding DisplayText}" 
-                       FontSize="40" 
-                       FontWeight="Light"
-                       Foreground="White"
-                       HorizontalAlignment="Right" 
-                       VerticalAlignment="Bottom"
-                       TextAlignment="Right"
-                       TextWrapping="NoWrap"
-                       TextTrimming="CharacterEllipsis"/>
+        <!-- Sidebar -->
+        <Border Grid.Column="0" Background="#1C1C1C" BorderBrush="#2C2C2E" BorderThickness="0,0,1,0">
+            <StackPanel Margin="10,20,10,10">
+                <TextBlock Text="MODOS" Foreground="#8E8E93" FontSize="12" FontWeight="SemiBold" Margin="10,0,0,10"/>
+                
+                <Button Content="Básica" Style="{StaticResource SidebarButtonStyle}" 
+                        Command="{Binding NavigateCommand}" CommandParameter="Basic"/>
+                
+                <Button Content="Científica" Style="{StaticResource SidebarButtonStyle}" 
+                        Command="{Binding NavigateCommand}" CommandParameter="Scientific"/>
+                
+                <Button Content="Graficador 2D" Style="{StaticResource SidebarButtonStyle}" 
+                        Command="{Binding NavigateCommand}" CommandParameter="Graph"/>
+                
+                <Button Content="Cálculo" Style="{StaticResource SidebarButtonStyle}" 
+                        Command="{Binding NavigateCommand}" CommandParameter="Calculus"/>
+                
+                <Button Content="Matrices" Style="{StaticResource SidebarButtonStyle}" 
+                        Command="{Binding NavigateCommand}" CommandParameter="Matrix"/>
+                
+                <Separator Background="#2C2C2E" Margin="0,15"/>
+                <TextBlock Text="OTROS" Foreground="#8E8E93" FontSize="12" FontWeight="SemiBold" Margin="10,0,0,10"/>
+
+                <Button Content="Historial" Style="{StaticResource SidebarButtonStyle}" 
+                        Command="{Binding NavigateCommand}" CommandParameter="History"/>
+            </StackPanel>
         </Border>
 
-        <!-- Grid de Botones -->
-        <Grid Grid.Row="1">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-
-            <!-- Fila 0 -->
-            <Button Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Content="C" 
-                    Style="{StaticResource ClearButtonStyle}" Command="{Binding ClearCommand}"/>
-            <Button Grid.Row="0" Grid.Column="2" Content="%" 
-                    Style="{StaticResource ClearButtonStyle}" Command="{Binding OperationCommand}" CommandParameter="%"/>
-            <Button Grid.Row="0" Grid.Column="3" Content="÷" 
-                    Style="{StaticResource OperatorButtonStyle}" Command="{Binding OperationCommand}" CommandParameter="/"/>
-
-            <!-- Fila 1 -->
-            <Button Grid.Row="1" Grid.Column="0" Content="7" 
-                    Style="{StaticResource NumericButtonStyle}" Command="{Binding NumberInputCommand}" CommandParameter="7"/>
-            <Button Grid.Row="1" Grid.Column="1" Content="8" 
-                    Style="{StaticResource NumericButtonStyle}" Command="{Binding NumberInputCommand}" CommandParameter="8"/>
-            <Button Grid.Row="1" Grid.Column="2" Content="9" 
-                    Style="{StaticResource NumericButtonStyle}" Command="{Binding NumberInputCommand}" CommandParameter="9"/>
-            <Button Grid.Row="1" Grid.Column="3" Content="×" 
-                    Style="{StaticResource OperatorButtonStyle}" Command="{Binding OperationCommand}" CommandParameter="*"/>
-
-            <!-- Fila 2 -->
-            <Button Grid.Row="2" Grid.Column="0" Content="4" 
-                    Style="{StaticResource NumericButtonStyle}" Command="{Binding NumberInputCommand}" CommandParameter="4"/>
-            <Button Grid.Row="2" Grid.Column="1" Content="5" 
-                    Style="{StaticResource NumericButtonStyle}" Command="{Binding NumberInputCommand}" CommandParameter="5"/>
-            <Button Grid.Row="2" Grid.Column="2" Content="6" 
-                    Style="{StaticResource NumericButtonStyle}" Command="{Binding NumberInputCommand}" CommandParameter="6"/>
-            <Button Grid.Row="2" Grid.Column="3" Content="−" 
-                    Style="{StaticResource OperatorButtonStyle}" Command="{Binding OperationCommand}" CommandParameter="-"/>
-
-            <!-- Fila 3 -->
-            <Button Grid.Row="3" Grid.Column="0" Content="1" 
-                    Style="{StaticResource NumericButtonStyle}" Command="{Binding NumberInputCommand}" CommandParameter="1"/>
-            <Button Grid.Row="3" Grid.Column="1" Content="2" 
-                    Style="{StaticResource NumericButtonStyle}" Command="{Binding NumberInputCommand}" CommandParameter="2"/>
-            <Button Grid.Row="3" Grid.Column="2" Content="3" 
-                    Style="{StaticResource NumericButtonStyle}" Command="{Binding NumberInputCommand}" CommandParameter="3"/>
-            <Button Grid.Row="3" Grid.Column="3" Content="+" 
-                    Style="{StaticResource OperatorButtonStyle}" Command="{Binding OperationCommand}" CommandParameter="+"/>
-
-            <!-- Fila 4 -->
-            <Button Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Content="0" 
-                    Style="{StaticResource NumericButtonStyle}" Command="{Binding NumberInputCommand}" CommandParameter="0"/>
-            <Button Grid.Row="4" Grid.Column="2" Content="." 
-                    Style="{StaticResource NumericButtonStyle}" Command="{Binding NumberInputCommand}" CommandParameter="."/>
-            <Button Grid.Row="4" Grid.Column="3" Content="=" 
-                    Style="{StaticResource EqualsButtonStyle}" Command="{Binding EqualsCommand}"/>
-        </Grid>
+        <!-- Main Content Area -->
+        <Border Grid.Column="1" Background="#1C1C1C">
+            <!-- ContentControl enruta dinámicamente el CurrentView a la DataTemplate correspondiente -->
+            <ContentControl Content="{Binding CurrentView}" Margin="10"/>
+        </Border>
     </Grid>
 </Window>
