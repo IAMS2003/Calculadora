@@ -20,7 +20,7 @@ namespace Calculadora.Models
         {
             try
             {
-                var expr = Expr.Parse(expression);
+                var expr = ParseNormalized(expression);
                 var derivative = expr.Differentiate(variable);
                 return FormatExpression(derivative);
             }
@@ -38,7 +38,7 @@ namespace Calculadora.Models
         {
             try
             {
-                var expr = Expr.Parse(expression);
+                var expr = ParseNormalized(expression);
                 // Math.NET Symbolics aplica simplificación automática al parsear
                 // y con RationalSimplify para simplificaciones más agresivas
                 return FormatExpression(expr);
@@ -57,7 +57,7 @@ namespace Calculadora.Models
         {
             try
             {
-                var expr = Expr.Parse(expression);
+                var expr = ParseNormalized(expression);
                 var expanded = expr.Expand();
                 return FormatExpression(expanded);
             }
@@ -75,7 +75,7 @@ namespace Calculadora.Models
         {
             try
             {
-                var expr = Expr.Parse(expression);
+                var expr = ParseNormalized(expression);
 
                 // Construir el diccionario de símbolos para Math.NET
                 var symbols = new Dictionary<string, FloatingPoint>();
@@ -111,13 +111,22 @@ namespace Calculadora.Models
         {
             try
             {
-                var expr = Expr.Parse(expression);
+                var expr = ParseNormalized(expression);
                 return expr.ToLaTeX();
             }
             catch (Exception ex)
             {
                 throw new ArgumentException($"No se pudo convertir a LaTeX: {ex.Message}", ex);
             }
+        }
+
+        /// <summary>
+        /// Parsea una expresión normalizando primero la multiplicación implícita.
+        /// </summary>
+        private Expr ParseNormalized(string expression)
+        {
+            string normalized = ExpressionNormalizer.Normalize(expression);
+            return Expr.Parse(normalized);
         }
 
         /// <summary>

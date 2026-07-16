@@ -13,8 +13,8 @@ namespace Calculadora.Models
 
         public ExpressionParser(string expression, bool isDegrees = false)
         {
-            // Remove spaces
-            _expression = expression.Replace(" ", "");
+            // Normalizar: elimina espacios e inserta '*' en multiplicaciones implícitas
+            _expression = ExpressionNormalizer.Normalize(expression);
             _pos = 0;
             _isDegrees = isDegrees;
         }
