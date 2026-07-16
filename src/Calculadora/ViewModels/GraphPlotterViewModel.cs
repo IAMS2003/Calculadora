@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Input;
 using Calculadora.Commands;
+using Calculadora.Services;
 
 namespace Calculadora.ViewModels
 {
@@ -30,6 +31,17 @@ namespace Calculadora.ViewModels
             
             AddExpressionCommand = new RelayCommand<object>(ExecuteAddExpression, CanExecuteAddExpression);
             RemoveExpressionCommand = new RelayCommand<string>(ExecuteRemoveExpression);
+
+            // Escuchar cuando otros módulos (ej. Cálculo) envían una función al graficador
+            EventAggregator.Instance.SendToGraphRequested += OnSendToGraphRequested;
+        }
+
+        private void OnSendToGraphRequested(string expression)
+        {
+            if (Expressions.Count < 5 && !Expressions.Contains(expression))
+            {
+                Expressions.Add(expression);
+            }
         }
 
         private bool CanExecuteAddExpression(object? parameter)
