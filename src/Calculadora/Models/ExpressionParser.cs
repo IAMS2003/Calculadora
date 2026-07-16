@@ -46,17 +46,31 @@ namespace Calculadora.Models
             return result;
         }
 
-        // Term = Factor { ("*"|"/"|"%") Factor }
+        // Term = Factor { ("*"|"/"|"%"|implicit) Factor }
+        // Multiplicación implícita: un número o ')' seguido directamente de '(' o una letra
+        // Ejemplo: 2x → 2*x, 2(3) → 2*(3), sin(x)cos(x) → sin(x)*cos(x)
         private double ParseTerm()
         {
             double result = ParseFactor();
             while (_pos < _expression.Length)
             {
                 char op = _expression[_pos];
-                if (op != '*' && op != '/' && op != '%') break;
-                _pos++;
-                double nextFactor = ParseFactor();
-                result = ScientificFunctions.EvaluateBinaryFunction(op.ToString(), result, nextFactor);
+                if (op == '*' || op == '/' || op == '%')
+                {
+                    _pos++;
+                    double nextFactor = ParseFactor();
+                    result = ScientificFunctions.EvaluateBinaryFunction(op.ToString(), result, nextFactor);
+                }
+                else if (op == '(' || char.IsLetter(op))
+                {
+                    // Multiplicación implícita: el siguiente token es '(' o un identificador
+                    double nextFactor = ParseFactor();
+                    result = ScientificFunctions.EvaluateBinaryFunction("*", result, nextFactor);
+                }
+                else
+                {
+                    break;
+                }
             }
             return result;
         }

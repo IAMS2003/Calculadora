@@ -18,11 +18,24 @@ namespace Calculadora.Tests
         [InlineData("5!", 120)]
         [InlineData("0!", 1)]
         [InlineData("3!+2", 8)]
+        [InlineData("2(3)", 6)]       // Multiplicación implícita: número antes de paréntesis
+        [InlineData("3(2+1)", 9)]     // Multiplicación implícita: número antes de expresión entre paréntesis
+        [InlineData("(2)(3)", 6)]     // Multiplicación implícita: paréntesis consecutivos — no aplica aquí, se maneja en ParseTerm
         public void Parse_BasicExpressions_ReturnsExpected(string expression, double expected)
         {
             var parser = new ExpressionParser(expression, isDegrees: false);
             double result = parser.Parse();
             Assert.Equal(expected, result, 5);
+        }
+
+        [Theory]
+        [InlineData("2pi", 6.28318)]      // Multiplicación implícita: número antes de constante
+        [InlineData("2e", 5.43656)]        // Multiplicación implícita: número antes de constante e
+        public void Parse_ImplicitMultiplicationWithConstants_ReturnsExpected(string expression, double expected)
+        {
+            var parser = new ExpressionParser(expression, isDegrees: false);
+            double result = parser.Parse();
+            Assert.Equal(expected, result, 3);
         }
 
         [Fact]

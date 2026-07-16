@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Input;
@@ -30,7 +31,32 @@ namespace Calculadora.Controls
 
         public static readonly DependencyProperty ExpressionsProperty =
             DependencyProperty.Register("Expressions", typeof(IEnumerable<string>), typeof(GraphPlotter), 
-                new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender));
+                new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender, OnExpressionsChanged));
+
+        private static void OnExpressionsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            var plotter = (GraphPlotter)d;
+
+            // Desuscribirse de la colección anterior
+            if (e.OldValue is INotifyCollectionChanged oldCollection)
+            {
+                oldCollection.CollectionChanged -= plotter.OnCollectionChanged;
+            }
+
+            // Suscribirse a la nueva colección
+            if (e.NewValue is INotifyCollectionChanged newCollection)
+            {
+                newCollection.CollectionChanged += plotter.OnCollectionChanged;
+            }
+
+            plotter.InvalidateVisual();
+        }
+
+        private void OnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            // La colección cambió internamente (Add/Remove), redibujar
+            InvalidateVisual();
+        }
 
         public IEnumerable<string> Expressions
         {
