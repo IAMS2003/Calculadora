@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Windows.Input;
 using Calculadora.Commands;
 using Calculadora.Models;
+using Calculadora.Services;
 
 namespace Calculadora.ViewModels
 {
@@ -200,7 +201,9 @@ namespace Calculadora.ViewModels
                 try
                 {
                     double result = _model.Calculate(_firstOperand, secondOperand, _currentOperator.Value);
+                    string expr = $"{FormatResult(_firstOperand)} {GetOperatorSymbol(_currentOperator.Value)} {FormatResult(secondOperand)}";
                     DisplayText = FormatResult(result);
+                    HistoryService.Instance.Add("Básica", expr, DisplayText);
                     _firstOperand = result;
                     _state = CalculatorState.ResultDisplayed;
                 }
@@ -241,6 +244,18 @@ namespace Calculadora.ViewModels
 
             // ToString("G15") mantiene hasta 15 dígitos significativos y corrige artifacts de precisión flotante
             return value.ToString("G15", CultureInfo.InvariantCulture);
+        }
+
+        private string GetOperatorSymbol(OperationType op)
+        {
+            return op switch
+            {
+                OperationType.Add => "+",
+                OperationType.Subtract => "-",
+                OperationType.Multiply => "×",
+                OperationType.Divide => "÷",
+                _ => ""
+            };
         }
     }
 }

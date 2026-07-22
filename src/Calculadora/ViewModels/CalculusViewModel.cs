@@ -118,6 +118,7 @@ namespace Calculadora.ViewModels
             try
             {
                 ResultExpression = _adapter.Differentiate(InputExpression, Variable);
+                HistoryService.Instance.Add("Cálculo", $"d/d{Variable}({InputExpression})", ResultExpression);
                 ErrorMessage = "";
             }
             catch (Exception ex) { ErrorMessage = ex.Message; ResultExpression = ""; }
@@ -129,6 +130,7 @@ namespace Calculadora.ViewModels
             try
             {
                 ResultExpression = _adapter.Simplify(InputExpression);
+                HistoryService.Instance.Add("Cálculo", $"Simplify({InputExpression})", ResultExpression);
                 ErrorMessage = "";
             }
             catch (Exception ex) { ErrorMessage = ex.Message; ResultExpression = ""; }
@@ -140,6 +142,7 @@ namespace Calculadora.ViewModels
             try
             {
                 ResultExpression = _adapter.Expand(InputExpression);
+                HistoryService.Instance.Add("Cálculo", $"Expand({InputExpression})", ResultExpression);
                 ErrorMessage = "";
             }
             catch (Exception ex) { ErrorMessage = ex.Message; ResultExpression = ""; }
@@ -171,6 +174,7 @@ namespace Calculadora.ViewModels
                     : NumericalCalculus.SimpsonRule(f, a, b);
 
                 ResultExpression = $"∫[{a},{b}] f(x) dx ≈ {result.ToString("G10", CultureInfo.InvariantCulture)}";
+                HistoryService.Instance.Add("Cálculo", $"∫[{a},{b}] ({InputExpression}) dx", result.ToString("G10", CultureInfo.InvariantCulture));
             }
             catch (Exception ex) { ErrorMessage = ex.Message; ResultExpression = ""; }
         }
@@ -196,6 +200,7 @@ namespace Calculadora.ViewModels
 
                 double root = NumericalCalculus.NewtonRaphson(f, x0);
                 ResultExpression = $"Raíz encontrada: x = {root.ToString("G10", CultureInfo.InvariantCulture)}";
+                HistoryService.Instance.Add("Cálculo", $"Root({InputExpression} = 0, x0={x0})", root.ToString("G10", CultureInfo.InvariantCulture));
             }
             catch (ConvergenceException ex) { ErrorMessage = ex.Message; ResultExpression = ""; }
             catch (Exception ex) { ErrorMessage = ex.Message; ResultExpression = ""; }
@@ -212,6 +217,7 @@ namespace Calculadora.ViewModels
 
                 var (_, _, description) = NumericalCalculus.SolveQuadratic(a, b, c);
                 ResultExpression = description;
+                HistoryService.Instance.Add("Cálculo", $"{a}x² + {b}x + {c} = 0", description);
             }
             catch (FormatException) { ErrorMessage = "Coeficientes inválidos."; ResultExpression = ""; }
             catch (Exception ex) { ErrorMessage = ex.Message; ResultExpression = ""; }

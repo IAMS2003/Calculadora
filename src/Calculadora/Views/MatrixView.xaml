@@ -135,15 +135,25 @@
 
             <!-- Controles -->
             <StackPanel Grid.Row="2" Margin="0,0,0,15">
-                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                    <TextBlock Text="Operación:" FontSize="14" Foreground="#8E8E93" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                    <ComboBox ItemsSource="{Binding Operations}" SelectedItem="{Binding SelectedOperation}"
-                              Background="#2C2C2E" Foreground="White" FontSize="14" Width="200" Padding="8"/>
-                </StackPanel>
-                <StackPanel Orientation="Horizontal">
-                    <Button Content="Calcular" Style="{StaticResource ActionBtn}" Command="{Binding CalculateCommand}" Margin="0,0,8,0"/>
-                    <Button Content="Limpiar" Style="{StaticResource SecondaryBtn}" Command="{Binding ClearCommand}"/>
-                </StackPanel>
+                <TextBlock Text="Operación:" FontSize="14" Foreground="#8E8E93" Margin="0,0,0,8"/>
+                <WrapPanel Margin="0,0,0,10">
+                    <Button Content="A + B" Style="{StaticResource ActionBtn}" 
+                            Command="{Binding CalculateCommand}" CommandParameter="Suma" Margin="0,0,5,5"/>
+                    <Button Content="A − B" Style="{StaticResource ActionBtn}" 
+                            Command="{Binding CalculateCommand}" CommandParameter="Resta" Margin="0,0,5,5"/>
+                    <Button Content="A × B" Style="{StaticResource ActionBtn}" 
+                            Command="{Binding CalculateCommand}" CommandParameter="Multiplicación" Margin="0,0,5,5"/>
+                    <Button Content="det(A)" Style="{StaticResource SecondaryBtn}" 
+                            Command="{Binding CalculateCommand}" CommandParameter="Determinante A" Margin="0,0,5,5"/>
+                    <Button Content="A⁻¹" Style="{StaticResource SecondaryBtn}" 
+                            Command="{Binding CalculateCommand}" CommandParameter="Inversa A" Margin="0,0,5,5"/>
+                    <Button Content="Aᵀ" Style="{StaticResource SecondaryBtn}" 
+                            Command="{Binding CalculateCommand}" CommandParameter="Transpuesta A" Margin="0,0,5,5"/>
+                    <Button Content="tr(A)" Style="{StaticResource SecondaryBtn}" 
+                            Command="{Binding CalculateCommand}" CommandParameter="Traza A" Margin="0,0,5,5"/>
+                </WrapPanel>
+                <Button Content="Limpiar" Style="{StaticResource SecondaryBtn}" Command="{Binding ClearCommand}" 
+                        Background="#48484A" Foreground="#AEAEB2" HorizontalAlignment="Left"/>
             </StackPanel>
 
             <!-- Resultado / Error -->

@@ -136,7 +136,10 @@ namespace Calculadora.ViewModels
                 }
                 else
                 {
-                    Expression = calcResult.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                    string oldExpr = Expression;
+                    string resStr = calcResult.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                    Calculadora.Services.HistoryService.Instance.Add("Científica", oldExpr, resStr);
+                    Expression = resStr;
                     Result = "";
                 }
             }

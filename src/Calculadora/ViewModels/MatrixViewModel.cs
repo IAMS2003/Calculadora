@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Windows.Input;
 using Calculadora.Commands;
 using Calculadora.Models;
+using Calculadora.Services;
 
 namespace Calculadora.ViewModels
 {
@@ -134,37 +135,46 @@ namespace Calculadora.ViewModels
             ErrorMessage = "";
             ResultText = "";
 
+            string operation = parameter as string ?? SelectedOperation;
+
             try
             {
                 var a = ReadMatrix(MatrixA);
 
-                switch (SelectedOperation)
+                switch (operation)
                 {
                     case "Suma":
                         var bSum = ReadMatrix(MatrixB);
                         ResultText = (a + bSum).ToString();
+                        HistoryService.Instance.Add("Matrices", $"A({a.Rows}×{a.Columns}) + B({bSum.Rows}×{bSum.Columns})", "Matriz");
                         break;
                     case "Resta":
                         var bSub = ReadMatrix(MatrixB);
                         ResultText = (a - bSub).ToString();
+                        HistoryService.Instance.Add("Matrices", $"A({a.Rows}×{a.Columns}) - B({bSub.Rows}×{bSub.Columns})", "Matriz");
                         break;
                     case "Multiplicación":
                         var bMul = ReadMatrix(MatrixB);
                         ResultText = (a * bMul).ToString();
+                        HistoryService.Instance.Add("Matrices", $"A({a.Rows}×{a.Columns}) × B({bMul.Rows}×{bMul.Columns})", "Matriz");
                         break;
                     case "Determinante A":
                         double det = a.Determinant();
                         ResultText = $"det(A) = {det.ToString("G6", CultureInfo.InvariantCulture)}";
+                        HistoryService.Instance.Add("Matrices", $"det(A_{a.Rows}×{a.Columns})", det.ToString("G6", CultureInfo.InvariantCulture));
                         break;
                     case "Inversa A":
                         ResultText = a.Inverse().ToString();
+                        HistoryService.Instance.Add("Matrices", $"A⁻¹({a.Rows}×{a.Columns})", "Matriz Inversa");
                         break;
                     case "Transpuesta A":
                         ResultText = a.Transpose().ToString();
+                        HistoryService.Instance.Add("Matrices", $"Aᵀ({a.Rows}×{a.Columns})", "Matriz Transpuesta");
                         break;
                     case "Traza A":
                         double trace = a.Trace();
                         ResultText = $"tr(A) = {trace.ToString("G6", CultureInfo.InvariantCulture)}";
+                        HistoryService.Instance.Add("Matrices", $"tr(A_{a.Rows}×{a.Columns})", trace.ToString("G6", CultureInfo.InvariantCulture));
                         break;
                 }
             }
