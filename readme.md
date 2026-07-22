@@ -1,122 +1,158 @@
-# Calculadora Básica WPF
+# Calculadora Científica Avanzada, Graficadora y Estadística (WPF)
 
-Una calculadora de escritorio para Windows desarrollada en **C#** y **.NET** utilizando **WPF (Windows Presentation Foundation)** y el patrón arquitectónico **MVVM (Model-View-ViewModel)** de forma nativa (clásica). 
+Una aplicación de escritorio profesional para Windows desarrollada en **C#** y **.NET** utilizando **WPF (Windows Presentation Foundation)** y el patrón arquitectónico **MVVM (Model-View-ViewModel)** nativo (sin frameworks de terceros).
 
-Este proyecto fue diseñado con fines de aprendizaje para dominar las bases de la programación orientada a objetos en C#, la separación de responsabilidades y las pruebas unitarias automatizadas.
+Inspirada en el flujo de trabajo y capacidades de las calculadoras científicas **Texas Instruments (TI-Nspire CAS)** y **GeoGebra**, esta suite integra desde operaciones básicas e intermedias hasta cálculo simbólico/numérico, graficación 2D interactiva, análisis estadístico con regresión de datos y resolución de sistemas matriciales.
 
 ---
 
 ## 🛠️ Stack Tecnológico
-* **Lenguaje:** C# (C# 12/13)
+* **Lenguaje:** C# (C# 12 / .NET 10)
 * **Framework UI:** WPF (.NET 10 para Windows)
-* **SDK:** .NET 10.0
-* **Framework de Pruebas:** xUnit
+* **Motor Simbólico:** Math.NET Symbolics (F# Expr Wrapper)
+* **Framework de Pruebas:** xUnit (189 pruebas unitarias automatizadas)
 * **Herramientas de construcción:** .NET CLI (`dotnet`) y MSBuild
 
 ---
 
 ## 📐 Arquitectura del Proyecto
 
-El proyecto está diseñado bajo una implementación estricta y manual del patrón **MVVM clásico** (sin usar librerías externas de MVVM como CommunityToolkit para entender mejor los fundamentos).
+El proyecto está diseñado bajo una implementación estricta y manual del patrón **MVVM clásico**:
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                     VISTA (XAML)                            │
-│  Views/MainWindow.xaml                                      │
-│  ┌────────────┐  ┌──────────┐  ┌──────────┐               │
-│  │ Display    │  │ 0-9, .   │  │ +−×÷%=C  │               │
-│  └─────┬──────┘  └────┬─────┘  └─────┬────┘               │
-│        │{Binding}      │{Binding}      │{Binding}           │
-├────────┼───────────────┼───────────────┼────────────────────┤
-│        ▼               ▼               ▼                    │
-│           VIEWMODEL (C# — Estado y Comandos)                │
-│  CalculatorViewModel : BaseViewModel                        │
-│  ┌────────────────────────────────────────────────────────┐ │
-│  │ DisplayText, _firstOperand, _state                     │ │
-│  │ NumberInputCommand  (RelayCommand<string>)              │ │
-│  │ OperationCommand    (RelayCommand<string>)              │ │
-│  │ EqualsCommand       (RelayCommand)                     │ │
-│  │ ClearCommand        (RelayCommand)                     │ │
-│  └──────────────────┬─────────────────────────────────────┘ │
-│                     │ Invoca                                │
-├─────────────────────┼───────────────────────────────────────┤
-│                     ▼                                       │
-│           MODELO (Lógica Matemática Pura — Stateless)        │
-│  CalculatorModel (stateless)                                │
-│  ┌────────────────────────────────────────────────────────┐ │
-│  │ Add, Subtract, Multiply, Divide                        │ │
-│  │ Percentage, Calculate                                  │ │
-│  └────────────────────────────────────────────────────────┘ │
-└─────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                            VISTA (XAML + WPF)                               │
+│  Views/MainWindow.xaml (Sidebar colapsable, navegación dinámica)            │
+│  ├── BasicCalculatorView.xaml       ├── CalculusView.xaml                   │
+│  ├── ScientificCalculatorView.xaml  ├── MatrixView.xaml                     │
+│  ├── GraphPlotterView.xaml          ├── StatisticsView.xaml                 │
+│  └── VirtualKeypadView.xaml         └── HistoryView.xaml                    │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                     VIEWMODEL (C# — Estado y Comandos)                      │
+│  NavigationViewModel (Router MVVM)                                          │
+│  ├── CalculatorViewModel            ├── CalculusViewModel                   │
+│  ├── ScientificViewModel            ├── MatrixViewModel                     │
+│  ├── GraphPlotterViewModel          ├── StatisticsViewModel                 │
+│  └── HistoryViewModel               └── BaseViewModel (INotifyProperty)     │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                  MODELO (Lógica Matemática & Algoritmos)                    │
+│  ├── CalculatorModel.cs (Operaciones básicas y porcentajes)                 │
+│  ├── ExpressionParser.cs & ExpressionNormalizer.cs (Parser de expresiones)  │
+│  ├── SymbolicAdapter.cs (Derivación y simplificación simbólica)              │
+│  ├── NumericalCalculus.cs (Simpson 1/3, Trapecio, Newton-Raphson)           │
+│  ├── CoordinateTransformer.cs & FunctionAnalyzer.cs (Geometría y puntos)    │
+│  ├── MatrixModel.cs & LinearSystemSolver.cs (Álgebra matricial y Gauss)     │
+│  ├── StatisticsModel.cs (Estadísticas y Regresión Lineal/Exponencial)       │
+│  └── HistoryService.cs & ExportService.cs (Historial y Exportación PNG/JSON)│
+└─────────────────────────────────────────────────────────────────────────────┘
 ```
-
-### 1. Modelo (`CalculatorModel.cs`)
-* **Libre de estado (Stateless):** No guarda ninguna información sobre las operaciones pasadas o en progreso.
-* **Funciones puras:** Contiene métodos matemáticos puros (`Add`, `Subtract`, `Multiply`, `Divide`, `Percentage`). Al recibir los mismos parámetros, siempre retorna el mismo resultado, sin efectos secundarios en el sistema.
-
-### 2. ViewModel (`CalculatorViewModel.cs`)
-* **Controlador de Estado:** Contiene las variables del estado de la calculadora y la máquina de estados.
-* **Comandos:** Expone propiedades `ICommand` (`NumberInputCommand`, `OperationCommand`, `EqualsCommand`, `ClearCommand`) a las que la vista XAML se enlaza.
-* **BaseViewModel:** Clase abstracta de infraestructura que implementa `INotifyPropertyChanged` usando el atributo compilador `[CallerMemberName]` para notificar cambios a la vista sin errores de strings mágicos.
-
-### 3. Vista (`MainWindow.xaml`)
-* **Declarativo (XAML):** Define la UI de la calculadora en un diseño plano y oscuro (modo oscuro minimalista con colores inspirados en el diseño de iOS).
-* **Code-behind Limpio:** El archivo C# asociado a la vista (`MainWindow.xaml.cs`) contiene únicamente la conexión del `DataContext` hacia el ViewModel, manteniéndose libre de lógica de negocio y capturando eventos de teclado.
 
 ---
 
-## ✨ Características y Reglas Implementadas
+## ✨ Módulos y Funcionalidades Principales
 
-1. **Máquina de Estados Sólida:** Transita ordenadamente entre estados (`Start`, `FirstOperandInput`, `OperatorSelected`, `SecondOperandInput`, `ResultDisplayed`, `Error`).
-2. **Encadenamiento (Chaining) de operaciones:** Permite presionar operadores de forma consecutiva (ej: `5 + 3 * 2` realiza automáticamente `5 + 3 = 8` al presionar `*`).
-3. **Porcentaje contextual:** Soporta porcentajes dependientes del operando principal (ej: `200 + 10%` calcula el 10% de 200 resultando en `220`) y porcentajes aislados (ej: `15%` de forma directa da `0.15`).
-4. **Robustez Regional (`InvariantCulture`):** Diseñado para ignorar la configuración del idioma de Windows, asegurando que el separador decimal sea siempre el punto (`.`) y previniendo caídas catastróficas por diferencias en la configuración regional (como el uso de la coma decimal en países hispanohablantes).
-5. **Límite en Pantalla:** Limita la entrada a un máximo de 15 dígitos en pantalla para evitar desbordamientos visuales.
-6. **Manejo de errores por división entre cero:** La división por cero es interceptada a nivel de modelo mediante una excepción manual `DivideByZeroException` (ya que la CPU de forma nativa en punto flotante no la genera) y se muestra visualmente como `"Error"` inhabilitando teclas de operación hasta ser limpiado.
-7. **Soporte de Teclado Completo:** Mapea automáticamente atajos físicos en la ventana utilizando eventos de túnel (`OnPreviewTextInput` y `OnPreviewKeyDown`) para que el usuario pueda escribir, borrar (Esc o Backspace) y operar utilizando su teclado estándar o numérico.
+### 1. 🔢 Calculadora Básica (con Previsualización en Tiempo Real)
+* **Display de Doble Línea:** Muestra la operación completa en la parte superior (`2 + 3 × 4`) y calcula una **previsualización en tiempo real** del resultado provisional (`= 14`) mientras se escribe.
+* **Máquina de Estados Sólida:** Transita entre estados (`Start`, `FirstOperandInput`, `OperatorSelected`, `SecondOperandInput`, `ResultDisplayed`, `Error`).
+* **Porcentaje Contextual:** Soporta porcentajes dependientes del operando (`200 + 10%` = `220`) y porcentajes directos (`15%` = `0.15`).
+
+### 2. 🧪 Calculadora Científica & Teclado Virtual
+* **Parser de Expresiones Matematicas (`ExpressionParser.cs`):** Soporta funciones trigonométricas (`sin`, `cos`, `tan`, `asin`, `acos`, `atan`), logaritmos (`ln`, `log`), exponenciales (`e`, `^`), factoriales (`!`) y constantes (`pi`, `e`).
+* **Multiplicación Implícita Universal (`ExpressionNormalizer.cs`):** Interpreta automáticamente expresiones en notación humana como `3x`, `2(3)`, `2pi`, `2sin(x)` o `(2)(3)`.
+* **Modos de Ángulo:** Alternador entre Grados (`DEG`) y Radianes (`RAD`).
+* **Teclado Virtual Matemático (`VirtualKeypadView.xaml`):** Panel interactivo con botones rápidos para insertar símbolos y funciones.
+
+### 3. 📈 Graficador 2D Interactivo
+* **Navegación Fluida:** Control de Zoom con la rueda del ratón y arrastre del plano (*Pan*) en tiempo real.
+* **Detección Automática de Puntos Notables (`FunctionAnalyzer.cs`):** Marca sobre las curvas:
+  * **Raíces** ($f(x)=0$) en verde.
+  * **Corte en Y** ($f(0)$) en cian.
+  * **Extremos relativos (Máximos y Mínimos)** en naranja/azul.
+  * **Intersecciones** entre funciones en amarillo.
+* **Mira de Coordenadas:** Muestra las coordenadas $(x, y)$ del cursor en tiempo real.
+* **Colores de Trazo Personalizables:** Asignación de color independiente por función (`FunctionItem.cs`) mediante una mini paleta circular.
+* **Exportación PNG (`ExportService.cs`):** Botón para capturar y guardar la gráfica en imagen PNG de alta resolución.
+
+### 4. 📐 Cálculo & Álgebra Simbólica (Estilo GeoGebra)
+* **Pestaña Simbólica:** Derivación respecto a cualquier variable ($\frac{d}{dx} f(x)$), simplificación $S(x)$ y expansión de polinomios $(x+a)^n$ usando Math.NET Symbolics.
+* **Integración Numérica:** Algoritmos de **Simpson (1/3)** y **Trapecio** para integrar $\int_a^b f(x) dx$ con límites definidos.
+* **Resolución de Ecuaciones:** Encontrar raíces con **Newton-Raphson** y solución exacta de ecuaciones cuadráticas $ax^2 + bx + c = 0$ (soporta raíces reales y complejas).
+* **Notación GeoGebra:** Botones y pestañas formateados con notación matemática elegante.
+
+### 5. ▦ Matrices y Solvador de Sistemas $N \times N$
+* **Dimensiones Editables:** Soporta matrices desde $1 \times 1$ hasta $10 \times 10$ con desplazamiento bidireccional.
+* **Operaciones Matriciales:** Suma ($A+B$), Resta ($A-B$), Multiplicación ($A \times B$), Determinante ($\det(A)$), Matriz Inversa ($A^{-1}$), Transpuesta ($A^T$) y Traza ($\text{tr}(A)$).
+* **Solvador de Sistemas Lineales ($AX = B$):** Algoritmo de eliminación Gauss-Jordan con pivoteo parcial (`LinearSystemSolver.cs`) para resolver sistemas de ecuaciones $N \times N$.
+
+### 6. 📊 Estadística & Regresión de Datos
+* **Editor de Puntos $(X, Y)$:** Tabla de datos interactiva con adición y eliminación de puntos.
+* **Estadísticas Descriptivas:** Cálculo de medias ($\bar{x}, \bar{y}$) y desviaciones estándar ($\sigma_x, \sigma_y$).
+* **Regresión de Datos:** Regresión **Lineal** ($y = mx + b$) y **Exponencial** ($y = a \cdot e^{bx}$) con coeficiente de determinación $R^2$.
+* **Integración con Graficador:** Botón **"📊 Graficar Curva de Regresión en 2D"** para proyectar los puntos y la curva ajustada en el plano cartesiano.
+
+### 7. 📜 Historial Global & Archivos de Proyecto (`.calc`)
+* **`HistoryService.cs`:** Registra centralizadamente las operaciones ejecutadas con marcas de tiempo `HH:mm:ss`, distintivos por módulo y botón para **copiar expresiones al portapapeles**.
+* **Archivos `.calc`:** Serialización y deserialización JSON para guardar y cargar proyectos completos.
+
+### 8. 🎨 Interfaz de Usuario y Tema Oscuro Estilizado
+* **Barra Lateral Colapsable:** Botón hamburguesa `☰` para alternar entre el menú expandido (`220px`) y compacto (`60px`) mostrando solo iconos con *tooltips*.
+* **Sistema de Diseño Oscuro (`App.xaml`):** ControlTemplates personalizados para `ComboBox`, `ComboBoxItem`, `TabControl` y `TabItem` con estados de hover, resaltado de selección `#0A84FF` y bordes redondeados.
 
 ---
 
-## 📂 Estructura de Carpetas
+## 📂 Estructura del Proyecto
 
 ```
 Calculadora/                          ← Raíz de la solución
 ├── src/
 │   └── Calculadora/                  ← Proyecto WPF principal
 │       ├── Calculadora.csproj
-│       ├── App.xaml / App.xaml.cs    ← Arranque del ciclo de vida
+│       ├── App.xaml / App.xaml.cs    ← Sistema de diseño oscuro y arranque
+│       ├── Controls/
+│       │   └── GraphPlotter.cs       ← Canvas personalizado de graficación 2D
+│       ├── Converters/
+│       │   ├── BoolToVisibilityConverter.cs
+│       │   └── NumberToGridLengthConverter.cs
 │       ├── Models/
-│       │   ├── CalculatorModel.cs    ← Lógica matemática pura
-│       │   └── OperationType.cs      ← Enumerador de operaciones
+│       │   ├── CalculatorModel.cs    ├── MatrixModel.cs
+│       │   ├── ExpressionParser.cs   ├── LinearSystemSolver.cs
+│       │   ├── ExpressionNormalizer.cs├── StatisticsModel.cs
+│       │   ├── SymbolicAdapter.cs    ├── FunctionAnalyzer.cs
+│       │   ├── NumericalCalculus.cs  ├── CoordinateTransformer.cs
+│       │   └── FunctionItem.cs       └── OperationType.cs
+│       ├── Services/
+│       │   ├── HistoryService.cs     ← Registro centralizado de historial
+│       │   ├── EventAggregator.cs    ← Comunicación desacoplada entre módulos
+│       │   └── ExportService.cs      ← Exportación PNG y serialización JSON
 │       ├── ViewModels/
-│       │   ├── BaseViewModel.cs      ← Notificaciones de Binding
-│       │   └── CalculatorViewModel.cs← Estado y comandos de la calculadora
+│       │   ├── BaseViewModel.cs      ├── MatrixViewModel.cs
+│       │   ├── NavigationViewModel.cs├── StatisticsViewModel.cs
+│       │   ├── CalculatorViewModel.cs├── HistoryViewModel.cs
+│       │   ├── ScientificViewModel.cs└── GraphPlotterViewModel.cs
 │       ├── Views/
-│       │   ├── MainWindow.xaml       ← Diseño de interfaz gráfica
-│       │   └── MainWindow.xaml.cs    ← Enlace de DataContext y atajos de teclado
+│       │   ├── MainWindow.xaml / .cs ├── CalculusView.xaml / .cs
+│       │   ├── BasicCalculatorView.xaml ├── MatrixView.xaml / .cs
+│       │   ├── ScientificCalculatorView.xaml ├── StatisticsView.xaml / .cs
+│       │   ├── GraphPlotterView.xaml ├── VirtualKeypadView.xaml / .cs
+│       │   └── HistoryView.xaml / .cs
 │       └── Commands/
-│           └── RelayCommand.cs       ← Implementación nativa de ICommand y ICommand<T>
+│           └── RelayCommand.cs       ← Implementación nativa de ICommand
 ├── tests/
-│   └── Calculadora.Tests/            ← Proyecto de pruebas unitarias xUnit
+│   └── Calculadora.Tests/            ← Proyecto de pruebas unitarias xUnit (189 tests)
 │       ├── Calculadora.Tests.csproj
-│       ├── Models/
-│       │   └── CalculatorModelTests.cs     ← Pruebas del modelo (36 casos)
-│       ├── ViewModels/
-│       │   ├── BaseViewModelTests.cs       ← Pruebas de notificaciones (4 casos)
-│       │   └── CalculatorViewModelTests.cs ← Pruebas de la máquina de estados (18 casos)
-│       └── Commands/
-│           └── RelayCommandTests.cs        ← Pruebas de comandos (10 casos)
-├── Calculadora.slnx                  ← Archivo de solución XML moderno (.NET 10)
-├── .gitignore                        ← Archivo de exclusiones de Git
-├── TODOS.md                          ← Lista de tareas diferidas
-└── readme.md                         ← Este archivo de documentación
+│       ├── CalculatorModelTests.cs   ├── MatrixModelTests.cs
+│       ├── CalculatorViewModelTests.cs├── NumericalCalculusTests.cs
+│       ├── ExpressionParserTests.cs  ├── StatisticsModelTests.cs
+│       ├── SymbolicAdapterTests.cs   ├── LinearSystemSolverTests.cs
+│       ├── FunctionAnalyzerTests.cs  ├── FunctionItemTests.cs
+│       └── HistoryServiceTests.cs
+├── Calculadora.sln                   ← Archivo de solución .NET
+└── README.md                         ← Documentación del proyecto
 ```
 
 ---
 
 ## 🚀 Cómo Compilar, Ejecutar y Probar
-
-Puedes utilizar la consola de comandos estándar en la raíz del proyecto para realizar todas las tareas principales:
 
 ### Compilar el proyecto
 ```bash
@@ -125,11 +161,12 @@ dotnet build
 
 ### Ejecutar la aplicación
 ```bash
-dotnet run --project src/Calculadora
+dotnet run --project src/Calculadora/Calculadora.csproj
 ```
 
 ### Ejecutar las Pruebas Unitarias
-El proyecto cuenta con un total de **68 pruebas unitarias** que cubren el 100% de la lógica de cálculo y los edge cases del ViewModel. Para ejecutarlas todas y ver el reporte:
+El proyecto cuenta con un total de **189 pruebas unitarias** que cubren la lógica de cálculo, la máquina de estados, álgebra simbólica/matricial, funciones geométricas y regresiones estadísticas. Para ejecutarlas:
+
 ```bash
 dotnet test
 ```
