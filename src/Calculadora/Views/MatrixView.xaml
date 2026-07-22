@@ -8,11 +8,11 @@
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="BorderBrush" Value="#48484A"/>
-            <Setter Property="Width" Value="55"/>
-            <Setter Property="Height" Value="35"/>
-            <Setter Property="Margin" Value="2"/>
-            <Setter Property="Padding" Value="4"/>
-            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Width" Value="48"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Margin" Value="1"/>
+            <Setter Property="Padding" Value="2"/>
+            <Setter Property="FontSize" Value="13"/>
             <Setter Property="FontFamily" Value="Consolas"/>
             <Setter Property="TextAlignment" Value="Center"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
@@ -32,7 +32,7 @@
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Padding" Value="18,10"/>
+            <Setter Property="Padding" Value="16,8"/>
             <Setter Property="Background" Value="#0A84FF"/>
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="Focusable" Value="False"/>
@@ -49,7 +49,7 @@
         </Style>
     </UserControl.Resources>
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
         <Grid Margin="20">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>  <!-- Título -->
@@ -71,65 +71,71 @@
                 <!-- Matriz A -->
                 <StackPanel Grid.Column="0" Margin="0,0,10,0">
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                        <TextBlock Text="Matriz A" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,15,0"/>
+                        <TextBlock Text="Matriz A" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,10,0"/>
                         <TextBox Style="{StaticResource DimSpinner}" 
                                  Text="{Binding RowsA, UpdateSourceTrigger=PropertyChanged}"/>
-                        <TextBlock Text="×" FontSize="14" VerticalAlignment="Center" Margin="5,0"/>
+                        <TextBlock Text="×" FontSize="14" VerticalAlignment="Center" Margin="4,0"/>
                         <TextBox Style="{StaticResource DimSpinner}" 
                                  Text="{Binding ColsA, UpdateSourceTrigger=PropertyChanged}"/>
+                        <TextBlock Text="(Máx 10×10)" FontSize="11" Foreground="#8E8E93" VerticalAlignment="Center" Margin="10,0,0,0"/>
                     </StackPanel>
 
-                    <ItemsControl ItemsSource="{Binding MatrixA}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <ItemsControl ItemsSource="{Binding}">
-                                    <ItemsControl.ItemsPanel>
-                                        <ItemsPanelTemplate>
-                                            <StackPanel Orientation="Horizontal"/>
-                                        </ItemsPanelTemplate>
-                                    </ItemsControl.ItemsPanel>
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <TextBox Style="{StaticResource MatrixCell}" 
-                                                     Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}"/>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
+                    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                        <ItemsControl ItemsSource="{Binding MatrixA}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <ItemsControl ItemsSource="{Binding}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel Orientation="Horizontal"/>
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBox Style="{StaticResource MatrixCell}" 
+                                                         Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}"/>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
                 </StackPanel>
 
                 <!-- Matriz B -->
                 <StackPanel Grid.Column="1" Margin="10,0,0,0">
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                        <TextBlock Text="Matriz B" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,15,0"/>
+                        <TextBlock Text="Matriz B" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,10,0"/>
                         <TextBox Style="{StaticResource DimSpinner}" 
                                  Text="{Binding RowsB, UpdateSourceTrigger=PropertyChanged}"/>
-                        <TextBlock Text="×" FontSize="14" VerticalAlignment="Center" Margin="5,0"/>
+                        <TextBlock Text="×" FontSize="14" VerticalAlignment="Center" Margin="4,0"/>
                         <TextBox Style="{StaticResource DimSpinner}" 
                                  Text="{Binding ColsB, UpdateSourceTrigger=PropertyChanged}"/>
+                        <TextBlock Text="(Máx 10×10)" FontSize="11" Foreground="#8E8E93" VerticalAlignment="Center" Margin="10,0,0,0"/>
                     </StackPanel>
 
-                    <ItemsControl ItemsSource="{Binding MatrixB}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <ItemsControl ItemsSource="{Binding}">
-                                    <ItemsControl.ItemsPanel>
-                                        <ItemsPanelTemplate>
-                                            <StackPanel Orientation="Horizontal"/>
-                                        </ItemsPanelTemplate>
-                                    </ItemsControl.ItemsPanel>
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <TextBox Style="{StaticResource MatrixCell}" 
-                                                     Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}"/>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
+                    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                        <ItemsControl ItemsSource="{Binding MatrixB}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <ItemsControl ItemsSource="{Binding}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel Orientation="Horizontal"/>
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBox Style="{StaticResource MatrixCell}" 
+                                                         Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}"/>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
                 </StackPanel>
             </Grid>
 
@@ -162,7 +168,7 @@
                     <TextBlock Text="{Binding ErrorMessage}" FontSize="14" Foreground="#FF453A" 
                                TextWrapping="Wrap" Margin="0,0,0,5"/>
                     <TextBlock Text="Resultado:" FontSize="14" Foreground="#8E8E93" Margin="0,0,0,8"/>
-                    <TextBlock Text="{Binding ResultText}" FontSize="16" FontFamily="Consolas" 
+                    <TextBlock Text="{Binding ResultText}" FontSize="15" FontFamily="Consolas" 
                                Foreground="#30D158" TextWrapping="Wrap"/>
                 </StackPanel>
             </Border>

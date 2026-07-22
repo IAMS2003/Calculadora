@@ -58,17 +58,32 @@
         </Grid.RowDefinitions>
 
         <!-- Display Area -->
-        <Border Grid.Row="0" Background="#1C1C1C" Padding="10" Height="80" 
+        <Border Grid.Row="0" Background="#1C1C1C" Padding="10" Height="100" 
                 BorderBrush="#2C2C2E" BorderThickness="0,0,0,1" Margin="0,0,0,10">
-            <TextBlock Text="{Binding DisplayText}" 
-                       FontSize="40" 
-                       FontWeight="Light"
-                       Foreground="White"
-                       HorizontalAlignment="Right" 
-                       VerticalAlignment="Bottom"
-                       TextAlignment="Right"
-                       TextWrapping="NoWrap"
-                       TextTrimming="CharacterEllipsis"/>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                
+                <!-- Expresión completa previa/actual -->
+                <TextBlock Grid.Row="0" Text="{Binding ExpressionText}" 
+                           FontSize="14" Foreground="#8E8E93" 
+                           HorizontalAlignment="Right" TextAlignment="Right"
+                           TextTrimming="CharacterEllipsis"/>
+                
+                <!-- Número/Operando en entrada -->
+                <TextBlock Grid.Row="1" Text="{Binding DisplayText}" 
+                           FontSize="34" FontWeight="Light" Foreground="White" 
+                           HorizontalAlignment="Right" VerticalAlignment="Center" 
+                           TextAlignment="Right" TextTrimming="CharacterEllipsis"/>
+                           
+                <!-- Previsualización en tiempo real (= Resultado) -->
+                <TextBlock Grid.Row="2" Text="{Binding LiveResultText}" 
+                           FontSize="16" Foreground="#30D158" FontWeight="SemiBold"
+                           HorizontalAlignment="Right" TextAlignment="Right"/>
+            </Grid>
         </Border>
 
         <!-- Grid de Botones -->

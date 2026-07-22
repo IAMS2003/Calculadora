@@ -8,6 +8,8 @@ namespace Calculadora.ViewModels
     {
         private BaseViewModel _currentView;
         private readonly Dictionary<string, BaseViewModel> _viewModels;
+        private bool _isSidebarCollapsed;
+        private string _activeMode = "Basic";
 
         public BaseViewModel CurrentView
         {
@@ -19,11 +21,34 @@ namespace Calculadora.ViewModels
             }
         }
 
+        public bool IsSidebarCollapsed
+        {
+            get => _isSidebarCollapsed;
+            set
+            {
+                _isSidebarCollapsed = value;
+                OnPropertyChanged(nameof(IsSidebarCollapsed));
+                OnPropertyChanged(nameof(SidebarWidth));
+            }
+        }
+
+        public double SidebarWidth => IsSidebarCollapsed ? 60 : 220;
+
+        public string ActiveMode
+        {
+            get => _activeMode;
+            set
+            {
+                _activeMode = value;
+                OnPropertyChanged(nameof(ActiveMode));
+            }
+        }
+
         public ICommand NavigateCommand { get; }
+        public ICommand ToggleSidebarCommand { get; }
 
         public NavigationViewModel()
         {
-            // Initialize ViewModels to keep their state when navigating away
             _viewModels = new Dictionary<string, BaseViewModel>
             {
                 { "Basic", new CalculatorViewModel() },
@@ -35,8 +60,8 @@ namespace Calculadora.ViewModels
             };
 
             NavigateCommand = new RelayCommand<string>(Navigate);
+            ToggleSidebarCommand = new RelayCommand<object>(_ => IsSidebarCollapsed = !IsSidebarCollapsed);
 
-            // Set default view
             _currentView = _viewModels["Basic"];
         }
 
@@ -45,6 +70,7 @@ namespace Calculadora.ViewModels
             if (viewName != null && _viewModels.TryGetValue(viewName, out var viewModel))
             {
                 CurrentView = viewModel;
+                ActiveMode = viewName;
             }
         }
     }

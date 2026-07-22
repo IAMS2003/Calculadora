@@ -8,8 +8,8 @@
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Margin" Value="0,0,8,0"/>
-            <Setter Property="Padding" Value="18,10"/>
+            <Setter Property="Margin" Value="0,0,8,6"/>
+            <Setter Property="Padding" Value="16,10"/>
             <Setter Property="Background" Value="#0A84FF"/>
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="Focusable" Value="False"/>
@@ -44,9 +44,9 @@
         </Grid.RowDefinitions>
 
         <!-- Título -->
-        <TextBlock Grid.Row="0" Text="Cálculo" FontSize="24" FontWeight="SemiBold" Margin="0,0,0,15"/>
+        <TextBlock Grid.Row="0" Text="Cálculo &amp; Álgebra Simbólica" FontSize="24" FontWeight="SemiBold" Margin="0,0,0,15"/>
 
-        <!-- Tabs -->
+        <!-- Tabs estilo GeoGebra con símbolos -->
         <TabControl Grid.Row="1" SelectedIndex="{Binding SelectedTabIndex}" 
                     Background="Transparent" BorderThickness="0" Margin="0,0,0,10">
             <TabControl.Resources>
@@ -55,35 +55,39 @@
                     <Setter Property="Foreground" Value="#8E8E93"/>
                     <Setter Property="Padding" Value="15,8"/>
                     <Setter Property="FontSize" Value="14"/>
+                    <Setter Property="FontWeight" Value="SemiBold"/>
                 </Style>
             </TabControl.Resources>
 
-            <!-- TAB 1: Simbólico -->
-            <TabItem Header="Simbólico">
+            <!-- TAB 1: Simbólico d/dx -->
+            <TabItem Header="d/dx  Simbólico">
                 <StackPanel Margin="0,15,0,0">
-                    <TextBlock Text="Expresión:" FontSize="14" Foreground="#8E8E93" Margin="0,0,0,5"/>
+                    <TextBlock Text="Expresión f(x):" FontSize="14" Foreground="#8E8E93" Margin="0,0,0,5"/>
                     <TextBox Style="{StaticResource InputField}" FontSize="18" Padding="12"
                              Text="{Binding InputExpression, UpdateSourceTrigger=PropertyChanged}"/>
 
                     <StackPanel Orientation="Horizontal" Margin="0,10,0,10">
-                        <TextBlock Text="Variable:" FontSize="14" Foreground="#8E8E93" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                        <TextBlock Text="Variable wrt:" FontSize="14" Foreground="#8E8E93" VerticalAlignment="Center" Margin="0,0,10,0"/>
                         <TextBox Style="{StaticResource InputField}" Width="60" TextAlignment="Center"
                                  Text="{Binding Variable, UpdateSourceTrigger=PropertyChanged}"/>
                     </StackPanel>
 
+                    <!-- Botones con Notación Matemática GeoGebra -->
                     <WrapPanel Margin="0,0,0,10">
-                        <Button Content="Derivar" Style="{StaticResource ActionBtn}" Command="{Binding DifferentiateCommand}"/>
-                        <Button Content="Simplificar" Style="{StaticResource SecondaryBtn}" Command="{Binding SimplifyCommand}"/>
-                        <Button Content="Expandir" Style="{StaticResource SecondaryBtn}" Command="{Binding ExpandCommand}"/>
-                        <Button Content="📊 Graficar" Style="{StaticResource SecondaryBtn}" Command="{Binding SendToGraphCommand}"/>
+                        <Button Style="{StaticResource ActionBtn}" Command="{Binding DifferentiateCommand}">
+                            <TextBlock><Run Text="d/d" /><Run Text="{Binding Variable, Mode=OneWay}" /><Run Text=" Derivar" /></TextBlock>
+                        </Button>
+                        <Button Content="S(x) Simplificar" Style="{StaticResource SecondaryBtn}" Command="{Binding SimplifyCommand}"/>
+                        <Button Content="(x+a)ⁿ Expandir" Style="{StaticResource SecondaryBtn}" Command="{Binding ExpandCommand}"/>
+                        <Button Content="📊 Graficar f(x)" Style="{StaticResource SecondaryBtn}" Command="{Binding SendToGraphCommand}"/>
                     </WrapPanel>
                 </StackPanel>
             </TabItem>
 
-            <!-- TAB 2: Integrales -->
-            <TabItem Header="Integrales">
+            <!-- TAB 2: Integrales ∫ dx -->
+            <TabItem Header="∫ dx  Integrales">
                 <StackPanel Margin="0,15,0,0">
-                    <TextBlock Text="f(x) a integrar:" FontSize="14" Foreground="#8E8E93" Margin="0,0,0,5"/>
+                    <TextBlock Text="Función a integrar f(x):" FontSize="14" Foreground="#8E8E93" Margin="0,0,0,5"/>
                     <TextBox Style="{StaticResource InputField}" FontSize="18" Padding="12"
                              Text="{Binding InputExpression, UpdateSourceTrigger=PropertyChanged}"/>
 
@@ -94,51 +98,51 @@
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="80"/>
                             <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="120"/>
+                            <ColumnDefinition Width="130"/>
                         </Grid.ColumnDefinitions>
 
-                        <TextBlock Grid.Column="0" Text="a =" FontSize="14" Foreground="#8E8E93" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                        <TextBlock Grid.Column="0" Text="a (inferior) =" FontSize="14" Foreground="#8E8E93" VerticalAlignment="Center" Margin="0,0,8,0"/>
                         <TextBox Grid.Column="1" Style="{StaticResource InputField}" TextAlignment="Center"
                                  Text="{Binding IntegralLowerBound, UpdateSourceTrigger=PropertyChanged}"/>
 
-                        <TextBlock Grid.Column="2" Text="b =" FontSize="14" Foreground="#8E8E93" VerticalAlignment="Center" Margin="15,0,8,0"/>
+                        <TextBlock Grid.Column="2" Text="b (superior) =" FontSize="14" Foreground="#8E8E93" VerticalAlignment="Center" Margin="15,0,8,0"/>
                         <TextBox Grid.Column="3" Style="{StaticResource InputField}" TextAlignment="Center"
                                  Text="{Binding IntegralUpperBound, UpdateSourceTrigger=PropertyChanged}"/>
 
                         <TextBlock Grid.Column="4" Text="Método:" FontSize="14" Foreground="#8E8E93" VerticalAlignment="Center" Margin="15,0,8,0"/>
                         <ComboBox Grid.Column="5" SelectedItem="{Binding IntegralMethod}"
                                   Background="#2C2C2E" Foreground="White" FontSize="14" Padding="8">
-                            <ComboBoxItem Content="Simpson"/>
+                            <ComboBoxItem Content="Simpson (1/3)"/>
                             <ComboBoxItem Content="Trapecio"/>
                         </ComboBox>
                     </Grid>
 
-                    <Button Content="Integrar" Style="{StaticResource ActionBtn}" Command="{Binding IntegrateCommand}" HorizontalAlignment="Left"/>
+                    <Button Content="∫ₐᵇ f(x)dx Integrar" Style="{StaticResource ActionBtn}" Command="{Binding IntegrateCommand}" HorizontalAlignment="Left"/>
                 </StackPanel>
             </TabItem>
 
-            <!-- TAB 3: Ecuaciones -->
-            <TabItem Header="Ecuaciones">
+            <!-- TAB 3: Ecuaciones f(x)=0 -->
+            <TabItem Header="f(x)=0  Ecuaciones">
                 <StackPanel Margin="0,15,0,0">
                     <!-- Newton-Raphson -->
-                    <TextBlock Text="Newton-Raphson: f(x) = 0" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,10"/>
+                    <TextBlock Text="Resolución Numérica de Raíces: f(x) = 0" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,10"/>
 
-                    <TextBlock Text="f(x):" FontSize="14" Foreground="#8E8E93" Margin="0,0,0,5"/>
+                    <TextBlock Text="Ecuación f(x) = 0:" FontSize="14" Foreground="#8E8E93" Margin="0,0,0,5"/>
                     <TextBox Style="{StaticResource InputField}" FontSize="18" Padding="12"
                              Text="{Binding InputExpression, UpdateSourceTrigger=PropertyChanged}"/>
 
                     <StackPanel Orientation="Horizontal" Margin="0,10,0,10">
-                        <TextBlock Text="x₀ =" FontSize="14" Foreground="#8E8E93" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                        <TextBlock Text="Semilla x₀ =" FontSize="14" Foreground="#8E8E93" VerticalAlignment="Center" Margin="0,0,8,0"/>
                         <TextBox Style="{StaticResource InputField}" Width="80" TextAlignment="Center"
                                  Text="{Binding NewtonInitialGuess, UpdateSourceTrigger=PropertyChanged}"/>
-                        <Button Content="Encontrar raíz" Style="{StaticResource ActionBtn}" Command="{Binding NewtonRaphsonCommand}" Margin="15,0,0,0"/>
+                        <Button Content="f(x)=0  Buscar Raíz (Newton)" Style="{StaticResource ActionBtn}" Command="{Binding NewtonRaphsonCommand}" Margin="15,0,0,0"/>
                     </StackPanel>
 
                     <!-- Separador -->
                     <Border BorderBrush="#48484A" BorderThickness="0,1,0,0" Margin="0,10,0,15"/>
 
                     <!-- Cuadrática -->
-                    <TextBlock Text="Ecuación Cuadrática: ax² + bx + c = 0" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,10"/>
+                    <TextBlock Text="Ecuación Polinómica Cuadrática: ax² + bx + c = 0" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,10"/>
 
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
                         <TextBlock Text="a =" FontSize="14" Foreground="#8E8E93" VerticalAlignment="Center" Margin="0,0,5,0"/>
@@ -150,7 +154,7 @@
                         <TextBlock Text="c =" FontSize="14" Foreground="#8E8E93" VerticalAlignment="Center" Margin="15,0,5,0"/>
                         <TextBox Style="{StaticResource InputField}" Width="60" TextAlignment="Center"
                                  Text="{Binding QuadC, UpdateSourceTrigger=PropertyChanged}"/>
-                        <Button Content="Resolver" Style="{StaticResource ActionBtn}" Command="{Binding SolveQuadraticCommand}" Margin="15,0,0,0"/>
+                        <Button Content="x = (-b ± √Δ)/2a Resolver" Style="{StaticResource ActionBtn}" Command="{Binding SolveQuadraticCommand}" Margin="15,0,0,0"/>
                     </StackPanel>
                 </StackPanel>
             </TabItem>

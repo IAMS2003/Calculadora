@@ -10,6 +10,8 @@ namespace Calculadora.ViewModels
         private string _expression = "";
         private string _result = "";
         private bool _isDegrees = true;
+        private bool _isEvaluated = false;
+        private string _lastResultStr = "";
 
         public string Expression
         {
@@ -65,24 +67,54 @@ namespace Calculadora.ViewModels
 
         private void ExecuteAppend(string? text)
         {
-            if (text != null)
-                Expression += text;
+            if (text == null) return;
+
+            if (_isEvaluated)
+            {
+                _isEvaluated = false;
+                // Si se presiona un operador (+ - * / ^), encadenar con el resultado anterior
+                if (text == "+" || text == "-" || text == "*" || text == "/" || text == "^" || text == "%")
+                {
+                    Expression = _lastResultStr + text;
+                    return;
+                }
+                else
+                {
+                    Expression = "";
+                }
+            }
+
+            Expression += text;
         }
 
         private void ExecuteAppendFunction(string? funcName)
         {
-            if (funcName != null)
-                Expression += $"{funcName}(";
+            if (funcName == null) return;
+
+            if (_isEvaluated)
+            {
+                _isEvaluated = false;
+                Expression = "";
+            }
+
+            Expression += $"{funcName}(";
         }
 
         private void ExecuteClear(object? parameter)
         {
             Expression = "";
             Result = "";
+            _isEvaluated = false;
+            _lastResultStr = "";
         }
 
         private void ExecuteBackspace(object? parameter)
         {
+            if (_isEvaluated)
+            {
+                _isEvaluated = false;
+            }
+
             if (Expression.Length > 0)
             {
                 Expression = Expression.Substring(0, Expression.Length - 1);
@@ -102,6 +134,8 @@ namespace Calculadora.ViewModels
                 return;
             }
 
+            if (_isEvaluated) return;
+
             try
             {
                 var parser = new ExpressionParser(Expression, IsDegrees);
@@ -109,22 +143,23 @@ namespace Calculadora.ViewModels
                 
                 if (double.IsNaN(calcResult) || double.IsInfinity(calcResult))
                 {
-                    Result = "Error: Indefinido";
+                    Result = "= Indefinido";
                 }
                 else
                 {
-                    Result = calcResult.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                    Result = $"= {calcResult.ToString(System.Globalization.CultureInfo.InvariantCulture)}";
                 }
             }
             catch
             {
-                // Live evaluation fails silently (e.g. typing "sin(")
-                Result = "...";
+                Result = "";
             }
         }
 
         private void ExecuteEvaluate(object? parameter)
         {
+            if (string.IsNullOrWhiteSpace(Expression)) return;
+
             try
             {
                 var parser = new ExpressionParser(Expression, IsDegrees);
@@ -132,15 +167,17 @@ namespace Calculadora.ViewModels
                 
                 if (double.IsNaN(calcResult) || double.IsInfinity(calcResult))
                 {
-                    Result = "Error: Indefinido";
+                    Result = "= Indefinido";
                 }
                 else
                 {
                     string oldExpr = Expression;
                     string resStr = calcResult.ToString(System.Globalization.CultureInfo.InvariantCulture);
                     Calculadora.Services.HistoryService.Instance.Add("Científica", oldExpr, resStr);
-                    Expression = resStr;
-                    Result = "";
+                    
+                    _lastResultStr = resStr;
+                    Result = $"= {resStr}";
+                    _isEvaluated = true;
                 }
             }
             catch (ArgumentOutOfRangeException)

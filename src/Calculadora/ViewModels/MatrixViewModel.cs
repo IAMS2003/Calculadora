@@ -51,25 +51,25 @@ namespace Calculadora.ViewModels
         public int RowsA
         {
             get => _rowsA;
-            set { _rowsA = Math.Max(1, Math.Min(value, 6)); OnPropertyChanged(nameof(RowsA)); RebuildMatrix(MatrixA, _rowsA, _colsA); }
+            set { _rowsA = Math.Max(1, Math.Min(value, 10)); OnPropertyChanged(nameof(RowsA)); RebuildMatrix(MatrixA, _rowsA, _colsA); }
         }
 
         public int ColsA
         {
             get => _colsA;
-            set { _colsA = Math.Max(1, Math.Min(value, 6)); OnPropertyChanged(nameof(ColsA)); RebuildMatrix(MatrixA, _rowsA, _colsA); }
+            set { _colsA = Math.Max(1, Math.Min(value, 10)); OnPropertyChanged(nameof(ColsA)); RebuildMatrix(MatrixA, _rowsA, _colsA); }
         }
 
         public int RowsB
         {
             get => _rowsB;
-            set { _rowsB = Math.Max(1, Math.Min(value, 6)); OnPropertyChanged(nameof(RowsB)); RebuildMatrix(MatrixB, _rowsB, _colsB); }
+            set { _rowsB = Math.Max(1, Math.Min(value, 10)); OnPropertyChanged(nameof(RowsB)); RebuildMatrix(MatrixB, _rowsB, _colsB); }
         }
 
         public int ColsB
         {
             get => _colsB;
-            set { _colsB = Math.Max(1, Math.Min(value, 6)); OnPropertyChanged(nameof(ColsB)); RebuildMatrix(MatrixB, _rowsB, _colsB); }
+            set { _colsB = Math.Max(1, Math.Min(value, 10)); OnPropertyChanged(nameof(ColsB)); RebuildMatrix(MatrixB, _rowsB, _colsB); }
         }
 
         public string SelectedOperation

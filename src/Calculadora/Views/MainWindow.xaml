@@ -5,13 +5,17 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:Calculadora.ViewModels"
         xmlns:views="clr-namespace:Calculadora.Views"
+        xmlns:converters="clr-namespace:Calculadora.Converters"
         mc:Ignorable="d"
-        Title="Calculadora Científica Avanzada" Height="600" Width="800"
-        MinWidth="800" MinHeight="600"
+        Title="Calculadora Científica Avanzada" Height="650" Width="850"
+        MinWidth="700" MinHeight="550"
         Background="#1C1C1C" Foreground="White"
         WindowStartupLocation="CenterScreen" ResizeMode="CanResize">
     
     <Window.Resources>
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisConverter" Invert="False"/>
+        <converters:BoolToVisibilityConverter x:Key="InverseBoolToVisConverter" Invert="True"/>
+
         <!-- DataTemplates para enrutar ViewModels a Views -->
         <DataTemplate DataType="{x:Type vm:CalculatorViewModel}">
             <views:BasicCalculatorView />
@@ -36,11 +40,12 @@
         <Style x:Key="SidebarButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="Foreground" Value="#AEAEB2"/>
-            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontSize" Value="15"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="HorizontalContentAlignment" Value="Left"/>
-            <Setter Property="Padding" Value="20,15"/>
+            <Setter Property="Padding" Value="12,12"/>
             <Setter Property="Margin" Value="0,2"/>
+            <Setter Property="Focusable" Value="False"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
@@ -62,38 +67,88 @@
 
     <Grid>
         <Grid.ColumnDefinitions>
-            <!-- Sidebar -->
-            <ColumnDefinition Width="220"/>
+            <!-- Sidebar Width bound to ViewModel -->
+            <ColumnDefinition Width="{Binding SidebarWidth, Converter={x:Static converters:NumberToGridLengthConverter.Instance}, FallbackValue=220}"/>
             <!-- Main Content -->
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
         <!-- Sidebar -->
-        <Border Grid.Column="0" Background="#1C1C1C" BorderBrush="#2C2C2E" BorderThickness="0,0,1,0">
-            <StackPanel Margin="10,20,10,10">
-                <TextBlock Text="MODOS" Foreground="#8E8E93" FontSize="12" FontWeight="SemiBold" Margin="10,0,0,10"/>
-                
-                <Button Content="Básica" Style="{StaticResource SidebarButtonStyle}" 
-                        Command="{Binding NavigateCommand}" CommandParameter="Basic"/>
-                
-                <Button Content="Científica" Style="{StaticResource SidebarButtonStyle}" 
-                        Command="{Binding NavigateCommand}" CommandParameter="Scientific"/>
-                
-                <Button Content="Graficador 2D" Style="{StaticResource SidebarButtonStyle}" 
-                        Command="{Binding NavigateCommand}" CommandParameter="Graph"/>
-                
-                <Button Content="Cálculo" Style="{StaticResource SidebarButtonStyle}" 
-                        Command="{Binding NavigateCommand}" CommandParameter="Calculus"/>
-                
-                <Button Content="Matrices" Style="{StaticResource SidebarButtonStyle}" 
-                        Command="{Binding NavigateCommand}" CommandParameter="Matrix"/>
-                
-                <Separator Background="#2C2C2E" Margin="0,15"/>
-                <TextBlock Text="OTROS" Foreground="#8E8E93" FontSize="12" FontWeight="SemiBold" Margin="10,0,0,10"/>
+        <Border Grid.Column="0" Background="#181818" BorderBrush="#2C2C2E" BorderThickness="0,0,1,0">
+            <DockPanel Margin="8,15,8,10">
+                <!-- Hamburger Button at Top -->
+                <Button DockPanel.Dock="Top" Command="{Binding ToggleSidebarCommand}" 
+                        Style="{StaticResource SidebarButtonStyle}" HorizontalContentAlignment="Center"
+                        ToolTip="Alternar barra lateral" Margin="0,0,0,15">
+                    <TextBlock Text="☰" FontSize="18" FontWeight="Bold" Foreground="White"/>
+                </Button>
 
-                <Button Content="Historial" Style="{StaticResource SidebarButtonStyle}" 
-                        Command="{Binding NavigateCommand}" CommandParameter="History"/>
-            </StackPanel>
+                <StackPanel DockPanel.Dock="Top">
+                    <!-- Section Title MODOS -->
+                    <TextBlock Text="MODOS" Foreground="#8E8E93" FontSize="11" FontWeight="SemiBold" Margin="10,0,0,8"
+                               Visibility="{Binding IsSidebarCollapsed, Converter={StaticResource InverseBoolToVisConverter}}"/>
+                    
+                    <Button Style="{StaticResource SidebarButtonStyle}" 
+                            Command="{Binding NavigateCommand}" CommandParameter="Basic" ToolTip="Básica">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="🔢" FontSize="16" Width="24" TextAlignment="Center" Margin="0,0,10,0"/>
+                            <TextBlock Text="Básica" VerticalAlignment="Center"
+                                       Visibility="{Binding IsSidebarCollapsed, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource InverseBoolToVisConverter}}"/>
+                        </StackPanel>
+                    </Button>
+                    
+                    <Button Style="{StaticResource SidebarButtonStyle}" 
+                            Command="{Binding NavigateCommand}" CommandParameter="Scientific" ToolTip="Científica">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="🧪" FontSize="16" Width="24" TextAlignment="Center" Margin="0,0,10,0"/>
+                            <TextBlock Text="Científica" VerticalAlignment="Center"
+                                       Visibility="{Binding IsSidebarCollapsed, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource InverseBoolToVisConverter}}"/>
+                        </StackPanel>
+                    </Button>
+                    
+                    <Button Style="{StaticResource SidebarButtonStyle}" 
+                            Command="{Binding NavigateCommand}" CommandParameter="Graph" ToolTip="Graficador 2D">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="📈" FontSize="16" Width="24" TextAlignment="Center" Margin="0,0,10,0"/>
+                            <TextBlock Text="Graficador 2D" VerticalAlignment="Center"
+                                       Visibility="{Binding IsSidebarCollapsed, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource InverseBoolToVisConverter}}"/>
+                        </StackPanel>
+                    </Button>
+                    
+                    <Button Style="{StaticResource SidebarButtonStyle}" 
+                            Command="{Binding NavigateCommand}" CommandParameter="Calculus" ToolTip="Cálculo">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="∫" FontSize="18" FontWeight="Bold" Width="24" TextAlignment="Center" Margin="0,0,10,0"/>
+                            <TextBlock Text="Cálculo" VerticalAlignment="Center"
+                                       Visibility="{Binding IsSidebarCollapsed, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource InverseBoolToVisConverter}}"/>
+                        </StackPanel>
+                    </Button>
+                    
+                    <Button Style="{StaticResource SidebarButtonStyle}" 
+                            Command="{Binding NavigateCommand}" CommandParameter="Matrix" ToolTip="Matrices">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="▦" FontSize="16" Width="24" TextAlignment="Center" Margin="0,0,10,0"/>
+                            <TextBlock Text="Matrices" VerticalAlignment="Center"
+                                       Visibility="{Binding IsSidebarCollapsed, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource InverseBoolToVisConverter}}"/>
+                        </StackPanel>
+                    </Button>
+                    
+                    <Separator Background="#2C2C2E" Margin="4,15"/>
+
+                    <!-- Section Title OTROS -->
+                    <TextBlock Text="OTROS" Foreground="#8E8E93" FontSize="11" FontWeight="SemiBold" Margin="10,0,0,8"
+                               Visibility="{Binding IsSidebarCollapsed, Converter={StaticResource InverseBoolToVisConverter}}"/>
+
+                    <Button Style="{StaticResource SidebarButtonStyle}" 
+                            Command="{Binding NavigateCommand}" CommandParameter="History" ToolTip="Historial">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="📜" FontSize="16" Width="24" TextAlignment="Center" Margin="0,0,10,0"/>
+                            <TextBlock Text="Historial" VerticalAlignment="Center"
+                                       Visibility="{Binding IsSidebarCollapsed, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource InverseBoolToVisConverter}}"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </DockPanel>
         </Border>
 
         <!-- Main Content Area -->
