@@ -1,6 +1,7 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Globalization;
+using System.Linq;
 using System.Windows.Input;
 using Calculadora.Commands;
 using Calculadora.Models;
@@ -8,9 +9,6 @@ using Calculadora.Services;
 
 namespace Calculadora.ViewModels
 {
-    /// <summary>
-    /// Representa una celda editable en la grilla de la matriz.
-    /// </summary>
     public class MatrixCell : BaseViewModel
     {
         private string _value = "0";
@@ -47,29 +45,51 @@ namespace Calculadora.ViewModels
 
         public ObservableCollection<ObservableCollection<MatrixCell>> MatrixA { get; } = new();
         public ObservableCollection<ObservableCollection<MatrixCell>> MatrixB { get; } = new();
+        public ObservableCollection<MatrixCell> VectorConstB { get; } = new();
 
         public int RowsA
         {
             get => _rowsA;
-            set { _rowsA = Math.Max(1, Math.Min(value, 10)); OnPropertyChanged(nameof(RowsA)); RebuildMatrix(MatrixA, _rowsA, _colsA); }
+            set
+            {
+                _rowsA = Math.Max(1, Math.Min(value, 10));
+                OnPropertyChanged(nameof(RowsA));
+                RebuildMatrix(MatrixA, _rowsA, _colsA);
+                RebuildVectorB();
+            }
         }
 
         public int ColsA
         {
             get => _colsA;
-            set { _colsA = Math.Max(1, Math.Min(value, 10)); OnPropertyChanged(nameof(ColsA)); RebuildMatrix(MatrixA, _rowsA, _colsA); }
+            set
+            {
+                _colsA = Math.Max(1, Math.Min(value, 10));
+                OnPropertyChanged(nameof(ColsA));
+                RebuildMatrix(MatrixA, _rowsA, _colsA);
+            }
         }
 
         public int RowsB
         {
             get => _rowsB;
-            set { _rowsB = Math.Max(1, Math.Min(value, 10)); OnPropertyChanged(nameof(RowsB)); RebuildMatrix(MatrixB, _rowsB, _colsB); }
+            set
+            {
+                _rowsB = Math.Max(1, Math.Min(value, 10));
+                OnPropertyChanged(nameof(RowsB));
+                RebuildMatrix(MatrixB, _rowsB, _colsB);
+            }
         }
 
         public int ColsB
         {
             get => _colsB;
-            set { _colsB = Math.Max(1, Math.Min(value, 10)); OnPropertyChanged(nameof(ColsB)); RebuildMatrix(MatrixB, _rowsB, _colsB); }
+            set
+            {
+                _colsB = Math.Max(1, Math.Min(value, 10));
+                OnPropertyChanged(nameof(ColsB));
+                RebuildMatrix(MatrixB, _rowsB, _colsB);
+            }
         }
 
         public string SelectedOperation
@@ -90,11 +110,6 @@ namespace Calculadora.ViewModels
             set { _errorMessage = value; OnPropertyChanged(nameof(ErrorMessage)); }
         }
 
-        public ObservableCollection<string> Operations { get; } = new()
-        {
-            "Suma", "Resta", "Multiplicación", "Determinante A", "Inversa A", "Transpuesta A", "Traza A"
-        };
-
         public ICommand CalculateCommand { get; }
         public ICommand ClearCommand { get; }
 
@@ -102,6 +117,7 @@ namespace Calculadora.ViewModels
         {
             RebuildMatrix(MatrixA, _rowsA, _colsA);
             RebuildMatrix(MatrixB, _rowsB, _colsB);
+            RebuildVectorB();
 
             CalculateCommand = new RelayCommand<object>(ExecuteCalculate);
             ClearCommand = new RelayCommand<object>(ExecuteClear);
@@ -119,6 +135,15 @@ namespace Calculadora.ViewModels
             }
         }
 
+        private void RebuildVectorB()
+        {
+            VectorConstB.Clear();
+            for (int i = 0; i < RowsA; i++)
+            {
+                VectorConstB.Add(new MatrixCell());
+            }
+        }
+
         private MatrixModel ReadMatrix(ObservableCollection<ObservableCollection<MatrixCell>> cells)
         {
             int rows = cells.Count;
@@ -128,6 +153,11 @@ namespace Calculadora.ViewModels
                 for (int j = 0; j < cols; j++)
                     matrix[i, j] = cells[i][j].NumericValue;
             return matrix;
+        }
+
+        private double[] ReadVectorB()
+        {
+            return VectorConstB.Select(c => c.NumericValue).ToArray();
         }
 
         private void ExecuteCalculate(object? parameter)
@@ -176,9 +206,22 @@ namespace Calculadora.ViewModels
                         ResultText = $"tr(A) = {trace.ToString("G6", CultureInfo.InvariantCulture)}";
                         HistoryService.Instance.Add("Matrices", $"tr(A_{a.Rows}×{a.Columns})", trace.ToString("G6", CultureInfo.InvariantCulture));
                         break;
+                    case "Sistema AX = B":
+                        double[] bVec = ReadVectorB();
+                        var (sol, desc) = LinearSystemSolver.Solve(a, bVec);
+                        if (sol != null)
+                        {
+                            ResultText = desc;
+                            HistoryService.Instance.Add("Matrices", $"Sistema AX=B ({a.Rows}×{a.Columns})", "Resuelto");
+                        }
+                        else
+                        {
+                            ErrorMessage = desc;
+                        }
+                        break;
                 }
             }
-            catch (InvalidOperationException ex)
+            catch (Exception ex)
             {
                 ErrorMessage = ex.Message;
             }
@@ -188,6 +231,7 @@ namespace Calculadora.ViewModels
         {
             RebuildMatrix(MatrixA, _rowsA, _colsA);
             RebuildMatrix(MatrixB, _rowsB, _colsB);
+            RebuildVectorB();
             ResultText = "";
             ErrorMessage = "";
         }

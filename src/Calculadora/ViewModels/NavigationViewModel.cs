@@ -56,6 +56,7 @@ namespace Calculadora.ViewModels
                 { "Graph", new GraphPlotterViewModel() },
                 { "Calculus", new CalculusViewModel() },
                 { "Matrix", new MatrixViewModel() },
+                { "Statistics", new StatisticsViewModel() },
                 { "History", new HistoryViewModel() }
             };
 

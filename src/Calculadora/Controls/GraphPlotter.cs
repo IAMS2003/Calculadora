@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Globalization;
+using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -15,10 +16,13 @@ namespace Calculadora.Controls
         private CoordinateTransformer _transformer = new CoordinateTransformer(0, 0);
         
         private Point _lastMousePosition;
+        private Point _hoverPoint;
         private bool _isDragging = false;
+        private bool _hasHover = false;
         
         private static readonly Pen AxisPen = new Pen(Brushes.White, 1);
         private static readonly Pen GridPen = new Pen(new SolidColorBrush(Color.FromArgb(50, 255, 255, 255)), 1);
+        private static readonly Pen TangentPen = new Pen(Brushes.Yellow, 1.5) { DashStyle = DashStyles.Dash };
         
         private static readonly Brush[] FunctionBrushes = new Brush[] 
         { 
@@ -38,6 +42,28 @@ namespace Calculadora.Controls
         public static readonly DependencyProperty ExpressionsProperty =
             DependencyProperty.Register("Expressions", typeof(IEnumerable<string>), typeof(GraphPlotter), 
                 new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender, OnExpressionsChanged));
+
+        public static readonly DependencyProperty ShowKeyPointsProperty =
+            DependencyProperty.Register("ShowKeyPoints", typeof(bool), typeof(GraphPlotter),
+                new FrameworkPropertyMetadata(true, FrameworkPropertyMetadataOptions.AffectsRender));
+
+        public bool ShowKeyPoints
+        {
+            get => (bool)GetValue(ShowKeyPointsProperty);
+            set => SetValue(ShowKeyPointsProperty, value);
+        }
+
+        public IEnumerable<FunctionItem> Functions
+        {
+            get { return (IEnumerable<FunctionItem>)GetValue(FunctionsProperty); }
+            set { SetValue(FunctionsProperty, value); }
+        }
+
+        public IEnumerable<string> Expressions
+        {
+            get { return (IEnumerable<string>)GetValue(ExpressionsProperty); }
+            set { SetValue(ExpressionsProperty, value); }
+        }
 
         private static void OnFunctionsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
@@ -105,18 +131,6 @@ namespace Calculadora.Controls
             InvalidateVisual();
         }
 
-        public IEnumerable<FunctionItem> Functions
-        {
-            get { return (IEnumerable<FunctionItem>)GetValue(FunctionsProperty); }
-            set { SetValue(FunctionsProperty, value); }
-        }
-
-        public IEnumerable<string> Expressions
-        {
-            get { return (IEnumerable<string>)GetValue(ExpressionsProperty); }
-            set { SetValue(ExpressionsProperty, value); }
-        }
-
         public GraphPlotter()
         {
             this.ClipToBounds = true;
@@ -126,6 +140,7 @@ namespace Calculadora.Controls
             this.MouseDown += OnMouseDown;
             this.MouseMove += OnMouseMove;
             this.MouseUp += OnMouseUp;
+            this.MouseLeave += OnMouseLeave;
             this.SizeChanged += OnSizeChanged;
         }
 
@@ -157,23 +172,32 @@ namespace Calculadora.Controls
 
         private void OnMouseMove(object sender, MouseEventArgs e)
         {
+            Point currentPos = e.GetPosition(this);
+            _hoverPoint = currentPos;
+            _hasHover = true;
+
             if (_isDragging)
             {
-                Point currentPos = e.GetPosition(this);
                 double deltaX = currentPos.X - _lastMousePosition.X;
                 double deltaY = currentPos.Y - _lastMousePosition.Y;
                 
                 _transformer.Pan(deltaX, deltaY);
                 _lastMousePosition = currentPos;
-                
-                InvalidateVisual();
             }
+
+            InvalidateVisual();
         }
 
         private void OnMouseUp(object sender, MouseButtonEventArgs e)
         {
             _isDragging = false;
             this.ReleaseMouseCapture();
+        }
+
+        private void OnMouseLeave(object sender, MouseEventArgs e)
+        {
+            _hasHover = false;
+            InvalidateVisual();
         }
 
         protected override void OnRender(DrawingContext dc)
@@ -188,6 +212,16 @@ namespace Calculadora.Controls
             DrawGrid(dc);
             DrawAxes(dc);
             DrawFunctions(dc);
+
+            if (ShowKeyPoints)
+            {
+                DrawKeyPoints(dc);
+            }
+
+            if (_hasHover)
+            {
+                DrawHoverInfo(dc);
+            }
         }
 
         private void DrawGrid(DrawingContext dc)
@@ -236,15 +270,15 @@ namespace Calculadora.Controls
             return n.ToString("0.##", CultureInfo.InvariantCulture);
         }
 
-        private void DrawText(DrawingContext dc, string text, Point origin)
+        private void DrawText(DrawingContext dc, string text, Point origin, Brush? brush = null)
         {
             FormattedText ft = new FormattedText(
                 text,
                 CultureInfo.InvariantCulture,
                 FlowDirection.LeftToRight,
                 new Typeface("Segoe UI"),
-                10,
-                Brushes.Gray,
+                11,
+                brush ?? Brushes.Gray,
                 VisualTreeHelper.GetDpi(this).PixelsPerDip);
             
             dc.DrawText(ft, origin);
@@ -344,6 +378,78 @@ namespace Calculadora.Controls
             
             geometry.Freeze();
             dc.DrawGeometry(null, pen, geometry);
+        }
+
+        private void DrawKeyPoints(DrawingContext dc)
+        {
+            var bounds = _transformer.GetMathBounds();
+            var expressionsList = Functions != null
+                ? Functions.Where(f => !string.IsNullOrWhiteSpace(f.Expression)).Select(f => f.Expression).ToList()
+                : (Expressions != null ? Expressions.Where(e => !string.IsNullOrWhiteSpace(e)).ToList() : new List<string>());
+
+            if (expressionsList.Count == 0) return;
+
+            foreach (var expr in expressionsList)
+            {
+                var points = FunctionAnalyzer.FindKeyPoints(expr, bounds.minX, bounds.maxX);
+                foreach (var kp in points)
+                {
+                    Point sp = _transformer.MathToScreen(kp.X, kp.Y);
+                    if (sp.X < 0 || sp.X > ActualWidth || sp.Y < 0 || sp.Y > ActualHeight) continue;
+
+                    Brush dotBrush = kp.Type switch
+                    {
+                        KeyPointType.Root => Brushes.LimeGreen,
+                        KeyPointType.YIntercept => Brushes.Cyan,
+                        KeyPointType.Maximum => Brushes.Orange,
+                        KeyPointType.Minimum => Brushes.DeepSkyBlue,
+                        _ => Brushes.Yellow
+                    };
+
+                    dc.DrawEllipse(dotBrush, new Pen(Brushes.Black, 1), sp, 5, 5);
+                    DrawText(dc, kp.Label, new Point(sp.X + 7, sp.Y - 14), dotBrush);
+                }
+            }
+
+            // Intersecciones entre pares de funciones
+            if (expressionsList.Count >= 2)
+            {
+                for (int i = 0; i < expressionsList.Count - 1; i++)
+                {
+                    for (int j = i + 1; j < expressionsList.Count; j++)
+                    {
+                        var intersections = FunctionAnalyzer.FindIntersections(expressionsList[i], expressionsList[j], bounds.minX, bounds.maxX);
+                        foreach (var ip in intersections)
+                        {
+                            Point sp = _transformer.MathToScreen(ip.X, ip.Y);
+                            if (sp.X < 0 || sp.X > ActualWidth || sp.Y < 0 || sp.Y > ActualHeight) continue;
+
+                            dc.DrawEllipse(Brushes.Yellow, new Pen(Brushes.Black, 1), sp, 5, 5);
+                            DrawText(dc, ip.Label, new Point(sp.X + 7, sp.Y - 14), Brushes.Yellow);
+                        }
+                    }
+                }
+            }
+        }
+
+        private void DrawHoverInfo(DrawingContext dc)
+        {
+            Point mathP = _transformer.ScreenToMath(_hoverPoint.X, _hoverPoint.Y);
+            string coords = $"({mathP.X:0.##}, {mathP.Y:0.##})";
+
+            // Dibujar mira/cursor en pantalla
+            Pen hoverPen = new Pen(new SolidColorBrush(Color.FromArgb(120, 255, 255, 255)), 1)
+            {
+                DashStyle = DashStyles.Dash
+            };
+
+            dc.DrawLine(hoverPen, new Point(_hoverPoint.X, 0), new Point(_hoverPoint.X, ActualHeight));
+            dc.DrawLine(hoverPen, new Point(0, _hoverPoint.Y), new Point(ActualWidth, _hoverPoint.Y));
+
+            // Caja con coordenadas
+            Rect infoRect = new Rect(_hoverPoint.X + 10, _hoverPoint.Y - 25, 110, 22);
+            dc.DrawRoundedRectangle(new SolidColorBrush(Color.FromArgb(200, 44, 44, 46)), new Pen(Brushes.Gray, 1), infoRect, 4, 4);
+            DrawText(dc, coords, new Point(_hoverPoint.X + 15, _hoverPoint.Y - 22), Brushes.White);
         }
     }
 }

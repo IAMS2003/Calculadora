@@ -52,6 +52,7 @@ namespace Calculadora.ViewModels
         public ICommand AddExpressionCommand { get; }
         public ICommand RemoveExpressionCommand { get; }
         public ICommand ChangeColorCommand { get; }
+        public ICommand ExportPngCommand { get; }
 
         public GraphPlotterViewModel()
         {
@@ -60,8 +61,25 @@ namespace Calculadora.ViewModels
             AddExpressionCommand = new RelayCommand<object>(ExecuteAddExpression, CanExecuteAddExpression);
             RemoveExpressionCommand = new RelayCommand<FunctionItem>(ExecuteRemoveExpression);
             ChangeColorCommand = new RelayCommand<FunctionItem>(ExecuteChangeColor);
+            ExportPngCommand = new RelayCommand<System.Windows.FrameworkElement>(ExecuteExportPng);
 
             EventAggregator.Instance.SendToGraphRequested += OnSendToGraphRequested;
+        }
+
+        private void ExecuteExportPng(System.Windows.FrameworkElement? element)
+        {
+            if (element == null) return;
+            var dlg = new Microsoft.Win32.SaveFileDialog
+            {
+                Filter = "Imagen PNG (*.png)|*.png",
+                DefaultExt = ".png",
+                FileName = "Grafica_2D.png"
+            };
+
+            if (dlg.ShowDialog() == true)
+            {
+                ExportService.ExportToPng(element, dlg.FileName);
+            }
         }
 
         private void OnSendToGraphRequested(string expression)

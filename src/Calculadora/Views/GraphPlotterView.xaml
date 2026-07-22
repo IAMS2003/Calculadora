@@ -88,13 +88,26 @@
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
 
-                <!-- Leyenda de ayuda -->
-                <TextBlock Grid.Row="3" Text="💡 Rueda del ratón = Zoom&#10;💡 Arrastrar = Mover plano" 
-                           FontSize="11" Foreground="#8E8E93" Margin="0,10,0,0" LineHeight="16"/>
+                <!-- Leyenda de ayuda y botón de exportar -->
+                <StackPanel Grid.Row="3" Margin="0,10,0,0">
+                    <TextBlock Text="💡 Rueda del ratón = Zoom&#10;💡 Arrastrar = Mover plano" 
+                               FontSize="11" Foreground="#8E8E93" Margin="0,0,0,10" LineHeight="16"/>
+                    <Button Content="📷 Exportar PNG" 
+                            Command="{Binding ExportPngCommand}"
+                            CommandParameter="{Binding ElementName=plotterControl}"
+                            Background="#2C2C2E" Foreground="#0A84FF" BorderThickness="0"
+                            Padding="12,8" FontSize="13" FontWeight="SemiBold">
+                        <Button.Resources>
+                            <Style TargetType="Border">
+                                <Setter Property="CornerRadius" Value="6"/>
+                            </Style>
+                        </Button.Resources>
+                    </Button>
+                </StackPanel>
             </Grid>
         </Border>
 
         <!-- Graficador (Derecha) -->
-        <controls:GraphPlotter Grid.Column="1" Functions="{Binding Functions}" />
+        <controls:GraphPlotter x:Name="plotterControl" Grid.Column="1" Functions="{Binding Functions}" />
     </Grid>
 </UserControl>
